@@ -53,8 +53,12 @@ harness, which applies a conservative static guard before execution: candidates
 whose code references `compile()`, `getattr()`, or `import sys` are labeled
 incorrect without being run. Six of the 1,987 labeled-incorrect candidates
 (0.3%) pass every reference assert when executed outside the guard; the frozen
-labels stand, and no incorrect-candidate-based rate in the paper can shift by
-more than 0.3 percentage points under either labeling.
+labels stand. Under the guard-free reading no pooled or per-family
+incorrect-candidate rate shifts by more than 0.5 percentage points (the
+within-crash TypeError share, a ratio of two moved counts, by at most 0.7); the
+moderator analysis has exactly one boundary stratum exposed (Qwen code-length-high,
+68% at n=22 frozen, would read 66.7% at n=21 guard-free), with every other
+qualifying stratum unchanged relative to the floor.
 
 - `data/mbpp_v2/production/` — 4,735 pairs, both arms (9,470 evaluator arms)
 - `data/mbpp_v2/control/` — neutral-verification control arm (4,718 records; 6,965 events, of which 2,241 are preserved HTTP 401 auth failures from a mid-run API-key invalidation on the GPT-5.4 arm; the 747 affected tasks were re-run after key replacement and all have valid final records)

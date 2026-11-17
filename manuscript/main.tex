@@ -618,7 +618,8 @@ replacement implementation.
 The preserved harness, candidates, raw responses, parsed decisions, validators, and
 deterministic analysis scripts are public at
 \url{https://github.com/AndBrilliant/selfcorr-benchmarks} (commit
-\texttt{fcb3486}), with SHA-256 manifests over every released data artifact. The HumanEval contrasts
+\texttt{fcb3486}, the frozen data snapshot); the audited release adds SHA-256
+manifests covering every released data artifact. The HumanEval contrasts
 reproduce from \path{scripts/humaneval/paired_contrasts.py}, the MBPP analyses from
 \path{scripts/mbpp_v2_analysis.py} and its companion scripts, and ledger integrity from
 \path{scripts/validate_mbpp_v2_pilot.py}.
@@ -1037,8 +1038,8 @@ correctness criterion, not a judgment about reasonable alternative readings of t
 prose. The corpus is the frozen 947-task subset inherited from the earlier preserved
 build (of the canonical 974; the 27 excluded task ids and their provenance are archived
 in \path{data/MBPP.corpus-provenance.json}), and reference-assert counts per kept task are three in 936 of
-the 947 tasks, with the remaining eleven carrying four to six (per-task counts are
-archived in the severity audit ledger). The full-population severity audit shows 84.4\% of incorrect
+the 947 tasks, with the remaining eleven carrying four to six (per-task reference
+asserts are archived in \path{data/MBPP.jsonl}). The full-population severity audit shows 84.4\% of incorrect
 candidates fail \emph{every} reference assert: the dominant pattern is wholesale
 behavioral failure under the benchmark's own criterion, not a near-miss on one
 ambiguous test. Six of the 1,987 (0.3\%) warrant an explicit reconciliation note:
@@ -1048,8 +1049,14 @@ execution, any candidate whose code references \texttt{compile()},
 stage. Executed outside the guard, each passes every reference assert for its
 task. Ground truth is defined by the operational harness, so the frozen labels
 stand; but because the guard-free reading would move these six to the correct
-pool, no incorrect-candidate-based rate in this paper can shift by more than
-$0.3$ percentage points under either labeling. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
+pool, no pooled or per-family incorrect-candidate rate in this paper shifts by
+more than $0.5$ percentage points under either labeling (the within-crash
+TypeError share, a ratio of two moved counts, shifts by at most $0.7$ points).
+The moderator analysis
+has exactly one boundary stratum exposed to this relabeling: its Qwen code-length-high
+stratum reports $68\%$ joint acceptance ($n=22$) under the frozen labels and would
+read $66.7\%$ ($n=21$) under the guard-free reading; every other stratum with at
+least ten paired incorrect candidates is unchanged in its relation to the floor. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
 breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
 renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ crash at runtime
 (\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 runtime
@@ -1308,7 +1315,7 @@ infrastructure buildout and design. This research received no external funding. 
 empirical measurements used the public HumanEval and MBPP benchmarks. The preserved
 benchmark harness, ledgers, and audit artifacts are publicly available at
 \texttt{https://github.com/\allowbreak AndBrilliant/\allowbreak selfcorr-benchmarks}
-(commit \texttt{fcb3486}). The author declares no conflicts of interest.
+(ledgers frozen since commit \texttt{fcb3486}; audited release at current \texttt{main}). The author declares no conflicts of interest.
 
 Use of AI tools: AI-assisted tools were used during manuscript preparation for language
 editing and drafting support. All ideas, methodology, theorems, and technical content
@@ -1477,8 +1484,8 @@ VERDICT: ACCEPT
 VERDICT: REJECT
 \end{quote}
 
-The production self-check wording said ``specification and tests''; the three
-reference asserts were nevertheless not shown to the evaluator, so ``tests''
+The production self-check wording said ``specification and tests''; the reference
+asserts were nevertheless not shown to the evaluator, so ``tests''
 referred to the hidden ground-truth criterion rather than visible evidence. The
 one-assert-visible control adds one example assert to both generator and
 evaluator. The cross-evaluation arms used the same self-check and steelman

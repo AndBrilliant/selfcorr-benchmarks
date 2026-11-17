@@ -1,0 +1,1479 @@
+\documentclass[journal]{IAENGtran}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{orcidlink}
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+\emergencystretch=3em
+
+\newtheorem{Theorem}{Theorem}[section]
+\newtheorem{Lemma}[Theorem]{Lemma}
+\newtheorem{Proposition}[Theorem]{Proposition}
+\newtheorem{Corollary}[Theorem]{Corollary}
+\newtheorem{Definition}[Theorem]{Definition}
+\newtheorem{Remark}[Theorem]{Remark}
+
+\begin{document}
+
+\title{Limits of Self-Correction in LLMs: When Self-Evaluation Accepts Wrong Answers}
+
+\author{Andrew~Michael~Brilliant,
+        \orcidlink{0009-0004-8024-5442}%
+\thanks{A.~M.~Brilliant is with Applied Dynamics Research, Sapporo, Japan (e-mail: ab@ad-research.org).}% <-this % stops a space
+}
+
+\markboth{International Journal of Computer Science (IJCS)}%
+{Brilliant: Limits of Self-Correction in LLMs}
+
+\maketitle
+
+\pagestyle{empty}
+\thispagestyle{empty}
+
+
+
+\begin{abstract}
+We measure whether self-evaluation catches errors. Each task contributes one immutable
+candidate, hashed before evaluation and never modified; evaluators judge without
+rewriting. For each model family we report the false-acceptance rate
+$\kappa=\Pr(A{=}1\mid T{=}0)$, the true-acceptance rate $\tau$, and the
+discrimination gap $\Delta=\tau-\kappa$, backed by a shared-blind-spot information
+bound $I(T;S\mid G)\leq I(T;Z\mid G)$ and a companion proposition on treating
+coupled verdicts as independent. A HumanEval pilot on one GPT-5.4 candidate per task
+(155 correct, 9 incorrect) calibrates the setup: self-check accepts $6/9$ incorrect
+candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
+control running the reference tests rejects all $9$. On 947 MBPP tasks across five
+model families --- 5$\times$947 = 4,735 nominal candidate pairs, of which 4,718
+were actually stored (947+938+942+944+947); the 17-pair gap is one-directional and
+is not a hidden retraction: it is the zero-stored cells (9 for
+ds-v4-flash, 5 for glm-5.3-flash, 3 for qwen38-flash; the two GPT families
+store the full 947 each) --- we run self-check and steelman evaluation on
+every stored candidate under a complete-response protocol that preserves
+raw responses before parsing and keeps malformed records in the denominators,
+with a neutral re-examination prompt at matched token use as control. Steelman lowers false acceptance in every family,
+surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
+($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction, and
+for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
+Each family also evaluates the other families' candidates: acceptance stays elevated
+for same-family evaluators after evaluator and generator fixed effects, and the
+effect survives a same-provider control. A severity audit of 1,987 incorrect
+candidates finds $84.4\%$ fail every reference assert, mostly wrong values
+($62.8\%$) and crashes ($37.0\%$). Consistent with the amplification proposition,
+repeated unanimous acceptance leaves $27$--$44\%$ residual error, and accepted
+candidates remain only $55$--$70\%$ correct.
+\end{abstract}
+
+\begin{IAENGkeywords}
+LLM, self-correction, self-evaluation, information theory, error correlation, external selection, benchmark evaluation.
+\end{IAENGkeywords}
+
+\IAENGpeerreviewmaketitle
+
+\section{Introduction}
+
+Large language models cannot reliably self-correct their reasoning~\cite{huang2024selfcorrect}.
+Tsui et al. argue that the failure is not a knowledge deficit: their models correct
+identical errors presented as external input while failing on the same errors in their
+own outputs, a phenomenon termed the \textbf{Self-Correction Blind Spot} and measured
+at an average 64.5\% failure rate across 14 models~\cite{tsui2025selfcorrection}.
+Our own cross-evaluation finds permissiveness to be largely general, so this study
+treats that account as motivation rather than as a premise. This paper argues that the failure is a
+structural property of certain evaluation configurations: when generator and evaluator
+share failure modes, agreement between them supplies weak evidence of correctness. A
+derivation can be elegant, internally consistent, and convincingly presented, yet contain
+an error the model cannot detect in its own output.
+
+Three questions are routinely conflated in this setting: whether a model can generate a
+correct answer, whether it can recognize its own errors under an internal evaluation
+procedure, and how its selection behavior changes when an external correctness channel is
+introduced. The first is a generation problem; the second is the subject of this paper;
+the third is where the remedy lies. The distinction matters because improvements in
+generation do not automatically improve recognition, and because what the evaluator is
+asked to do---not simply how much computation it spends---determines what an acceptance
+verdict is worth.
+
+\subsection{Contributions}
+
+\begin{enumerate}
+    \item \textbf{A measurable diagnostic.} We define the false-acceptance rate $\kappa$,
+    true-acceptance rate $\tau$, discrimination gap $\Delta=\tau-\kappa$, and
+    acceptance log-likelihood evidence $E=\log_2(\tau/\kappa)$ on frozen candidates, and
+    show how to estimate them without any candidate revision, resampling, or repair
+    (Section~\ref{sec:formalization}).
+    \item \textbf{Paired measurements at two scales.} On the complete 164-task HumanEval
+    benchmark, one frozen GPT-5.4 candidate per task yields false acceptance of $6/9$,
+    $3/9$, and $0/9$ under self-check, steelman, and an execution-grounded positive
+    control. On 947 MBPP tasks across five model families, steelman lowers false
+    acceptance in every family, with five-family Holm-adjusted significance for Qwen and
+    GPT-6-Luna. Supplementary arms---repeated evaluation, candidate replication, a
+    registered moderation analysis, a neutral re-examination control, and a full
+    cross-evaluation matrix---localize what the improvement is and is not
+    (Section~\ref{sec:empirical}).
+    \item \textbf{Conditional theoretical bounds.} Under a shared-blind-spot modeling
+    assumption, self-evaluation is bounded in what it can add about correctness
+    (Theorem~\ref{thm:info_bound}); $k$ rounds of self-critique inherit the same ceiling
+    (Lemma~\ref{lem:repeated}); naive independence treatment of coupled evaluations can
+    amplify confidence in errors (Proposition~\ref{prop:miscalibration}); and a selector
+    satisfying measurable acceptance-rate bounds supplies a quantifiable evidence floor
+    (Proposition~\ref{prop:multi_agent}). The proofs are short; the contribution is the
+    measurement program they generate, and the central open problem---an independently
+    specified blind-spot variable $Z$---is stated precisely with concrete candidate
+    approaches.
+    \item \textbf{An auditable protocol and design principles.} Every response is
+    preserved before parsing, no output cap is imposed, malformed responses remain
+    visible with fixed denominators, and all artifacts carry SHA-256 manifests in a
+    public repository. The design principles for external selection are offered as
+    engineering heuristics motivated by the analysis, not as theorem-derived guarantees.
+\end{enumerate}
+
+\paragraph{Scope.} This is an \emph{empirical measurement paper with a conditional
+theoretical framework}, not an impossibility paper. The information bounds are standard
+chain-rule and data-processing consequences whose role is to organize the measurable
+quantities, not to constitute a new limitation theorem. The central negative results
+assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
+is so corrupted by shared blind spots that the input itself supplies no residual
+correctness signal. Selectors with an independent ground-truth channel---a proof checker,
+test executor, or independently trained model---fall outside that regime. Cross-generator
+error agreement is independently documented at scale~\cite{kim2025correlated}, though
+agreement between generators is not itself evidence of evaluator false acceptance. We do
+not claim all self-evaluation fails, only that it can fail in this regime, and we measure
+when it does.
+
+\section{The Measurement Framework}
+\label{sec:formalization}
+
+This section defines the objects every later claim uses. Let the input space be
+$\mathcal{X}$ and hypothesis space $\mathcal{H}$. For an input $X\sim\mathcal{D}$:
+
+\begin{Definition}[Generator and Selector]
+A \textbf{generator} produces candidate hypotheses via a conditional distribution
+$G \sim p(g \mid x)$. A \textbf{selector} produces an evaluation score via
+$S \sim p(s \mid x, g)$. The \textbf{acceptance decision} is a deterministic threshold:
+\begin{equation}
+A := \mathbf{1}\{S \geq \theta_A\}
+\end{equation}
+\end{Definition}
+
+\begin{Definition}[Correctness Indicator]
+Let $C:\mathcal{X}\times\mathcal{H}\to\{0,1\}$ be a task-specific correctness
+criterion fixed independently of the selector's acceptance decision. We define the
+\textbf{correctness indicator}:
+\begin{equation}
+T := C(X,G).
+\end{equation}
+Thus $T=1$ when the generated candidate satisfies the relevant correctness criterion and
+$T=0$ otherwise. Exact-answer settings are recovered by taking
+$C(x,g)=\mathbf{1}\{g=H^\star(x)\}$ for a target function $H^\star$; executable
+benchmarks may instead use a pre-specified behavioral criterion, such as passing a fixed
+reference-test suite. The formal results below require only the binary variable $T$, not
+uniqueness of a correct hypothesis.
+\end{Definition}
+
+\begin{Definition}[Error Events]
+The \textbf{generator error event} is $E_G := \{T = 0\}$. The \textbf{selector error
+event} is:
+\begin{equation}
+E_S := \{A \neq T\}
+\end{equation}
+That is, $E_S$ occurs when the selector accepts an incorrect hypothesis ($A=1, T=0$) or
+rejects a correct one ($A=0, T=1$).
+\end{Definition}
+
+\begin{Definition}[Conditional Error Coupling]
+The \textbf{conditional error coupling} is:
+\begin{align}
+\kappa &:= \Pr(E_S = 1 \mid E_G = 1) = \Pr(A = 1 \mid T = 0), \\
+\tau &:= \Pr(A = 1 \mid T = 1).
+\end{align}
+Here $\kappa$ is the probability that the selector accepts given that the generator is wrong,
+and $\tau$ is the true-acceptance rate. Strong
+coupling ($\kappa \approx 1$) indicates that the selector fails to detect generator errors.
+Operationally $\kappa$ is a \emph{false-acceptance rate}, not a measured correlation of
+failure mechanisms: an evaluator that always accepts has $\kappa=1$ regardless of whether
+it shares any latent blind spot with the generator. We retain ``coupling'' as the
+framework's term for the conditional quantity, but the experiments estimate evaluator
+discrimination, not the latent variable $Z$ or the assumption
+$S \perp T \mid (G,Z)$; attributing high $\kappa$ to a shared-blind-spot mechanism is a
+hypothesis the framework supplies, not something the measurements identify.
+\end{Definition}
+
+Two companion quantities complete the diagnostic. The \textbf{discrimination gap}
+$\Delta=\tau-\kappa$ measures how well the evaluator separates correct from incorrect
+candidates, and the \textbf{acceptance log-likelihood evidence}
+$E=\log_2(\tau/\kappa)$ measures the bits of evidence about correctness supplied by an
+acceptance verdict---an event-specific likelihood ratio, not a mutual information.
+Overall accuracy is deliberately not the endpoint: on a corpus with 155 correct and 9
+incorrect candidates, an always-accept evaluator scores $94.5\%$ while detecting no
+errors at all.
+
+\paragraph{The frozen-candidate principle.} All experiments below evaluate one immutable
+candidate per task, hashed before any evaluation, with ground truth assigned once by the
+benchmark's reference tests and never recomputed. Evaluator prompts forbid modification,
+repair, alternative solutions, and execution. The experiment therefore measures evaluator
+acceptance, not correction success, and no candidate property can confound a within-task
+arm comparison.
+
+\subsection{Shared Blind Spots}
+
+To model one mechanism by which errors might correlate, we introduce a latent variable
+capturing shared failure modes.
+
+\begin{Definition}[Blind Spot Variable]
+Let $Z \in \mathcal{Z}$ be a latent variable indexing input regions where a model family
+systematically struggles. We say generator and selector \textbf{share blind spots} indexed
+by $Z$ if there exists a set $\mathcal{Z}_{\mathrm{bad}} \subset \mathcal{Z}$ such that:
+\begin{align}
+\Pr(T = 0 \mid Z \in \mathcal{Z}_{\mathrm{bad}}) &\geq \alpha_G \gg \Pr(T = 0) \\
+\Pr(A = 1 \mid T = 0, Z \in \mathcal{Z}_{\mathrm{bad}}) &\geq \alpha_S > \Pr(A = 1 \mid T = 0)
+\end{align}
+while both failure rates are low on $\mathcal{Z} \setminus \mathcal{Z}_{\mathrm{bad}}$.
+\end{Definition}
+
+Shared blind spots arise naturally when generator and selector share training data,
+architecture, or context. For the formal results to have practical force, $Z$ needs an
+independent, a priori characterization---a fixed taxonomy of known failure modes for a
+model family---not a post hoc fit to observed joint failure. \cite{erroratlas2026} provide one candidate starting point: ErrorAtlas, an empirically
+derived taxonomy built from 83 LLMs across 35 datasets. The published atlas can be
+frozen before applying it to the generator--selector pairs analyzed here. The Self-Correction Blind Spot of \cite{tsui2025selfcorrection} is consistent with
+high $\alpha_S$ in the self-evaluation setting.
+
+\begin{Remark}[The modeling assumption]
+\label{rem:ci_assumption}
+The selector $S \sim p(s \mid x, g)$ has access to the input $x$ as well as the generator output $g$, and since $T=C(X,G)$ generally depends on $x$, the selector could in principle be informative about $T$ by comparing $g$ against the correct answer for that $x$, a channel independent of $Z$. The assumption $S \perp T \mid (G, Z)$ therefore encodes a specific failure regime: the selector's evaluation process is itself corrupted by the same shared blind spots $Z$, so accessing $x$ yields no correctness signal beyond what $Z$ already mediates. This is precisely the self-evaluation setting, where a model evaluating its own output brings the same failure modes to the same inputs. A proof checker, test executor, or independently trained model violates the assumption only if it supplies residual correctness information, $I(T;S\mid G,Z)>0$. Independent ground-truth access alone does not guarantee this condition: the channel may be unused or uninformative given $(G,Z)$. When residual information is present, external selection can add information beyond the shared blind spots. All subsequent results are conditional on this assumption: an empirically plausible failure regime, not a universal property of self-evaluation.
+\end{Remark}
+
+\section{Conditional Bounds on Self-Evaluation}
+\label{sec:self_eval_fails}
+
+The central quantity is $I(T;S\mid G)$: the information the selector provides about
+correctness given that we already observe the generator output. Conditioning on $G$
+rather than on $(G,X)$ is a deliberate modeling choice: under
+Remark~\ref{rem:ci_assumption}'s assumption, the selector's access to $X$ yields no
+correctness signal beyond what $Z$ mediates, and selectors whose use of $X$ supplies
+residual correctness information given $(G,Z)$ fall outside this section's scope. Two
+theorems formalize distinct consequences: an information-theoretic ceiling
+(Theorem~\ref{thm:info_bound}) and an acceptance evidence bound
+(Theorem~\ref{thm:evidence_bound}). Correlated errors can make self-evaluation weakly
+informative, but positive association alone does not imply negligible evidence: the
+evidence bound is determined by measurable acceptance rates, whereas the ceiling
+additionally requires the latent-variable assumptions.
+
+\subsection{Information-Theoretic Scaffolding: Bounding What $Z$ Mediates}
+
+The first theorem bounds what shared blind spots permit any selector to reveal.
+
+\begin{Theorem}[Shared-Blind-Spot Information Bound]
+\label{thm:info_bound}
+Let $Z$ be a latent variable. Assume the conditional independence
+\begin{equation*}
+S \perp T \mid (G, Z).
+\end{equation*}
+Then:
+\begin{equation}
+I(T; S \mid G) \leq I(T; Z \mid G)
+\end{equation}
+In particular, if $T \perp Z \mid G$, then $I(T; S \mid G) = 0$.
+\end{Theorem}
+
+\begin{proof}
+By the chain rule for conditional mutual information:
+\begin{equation}
+I(T; S, Z \mid G) = I(T; Z \mid G) + I(T; S \mid G, Z)
+\end{equation}
+Under $S \perp T \mid (G, Z)$, we have $I(T; S \mid G, Z) = 0$, hence:
+\begin{equation}
+I(T; S, Z \mid G) = I(T; Z \mid G)
+\end{equation}
+Also by the chain rule:
+\begin{multline}
+I(T; S, Z \mid G) = I(T; S \mid G) + I(T; Z \mid G, S) \\
+\geq I(T; S \mid G)
+\end{multline}
+since mutual information is nonnegative. Combining yields $I(T; S \mid G) \leq I(T; Z \mid G)$.
+If additionally $T \perp Z \mid G$, then $I(T; Z \mid G) = 0$ and the result follows.
+
+\end{proof}
+
+\begin{Remark}[On the informativeness of the bound]
+\label{rem:vacuity}
+The bound is non-vacuous only under two conditions: (1)~$Z$ is constrained
+independently of $T$ and $S$---without this, $Z$ could always be chosen post hoc to encode
+all residual dependence between $S$ and $T$, rendering the bound trivially satisfied---and
+(2)~$I(T; Z \mid G)$ is shown to be small, so the cap is tight; if $Z$ carries substantial
+information about correctness beyond what $G$ reveals, the bound permits $S$ to be highly
+informative. Theorem~\ref{thm:info_bound} therefore identifies a structural
+relationship---information from $S$ is $Z$-mediated---rather than proving that
+self-evaluation is empirically weak. Practical application requires an a priori
+characterization of $Z$ (e.g., a fixed taxonomy of known failure modes) that does not
+depend on the observed outcome; the paper does not independently establish condition (2)
+for real LLM systems. Lemma~\ref{lem:repeated} and Proposition~\ref{prop:multi_agent}
+carry more direct practical content because their conditions are expressible in directly
+measurable probabilities.
+\end{Remark}
+
+\subsection{The Necessity of Falsifiable $Z$}
+\label{sec:falsifiable_z}
+As Remark~\ref{rem:vacuity} notes, $Z$ can always be constructed post hoc, so
+Theorem~\ref{thm:info_bound} cannot by itself predict or diagnose failure in real
+systems; it becomes empirically meaningful only when $Z$ is characterized independently
+of the failure events being analyzed---defined prior to observation, estimable from
+separate data, and constrained to a fixed taxonomy. The theorem's contribution is to
+identify exactly what must be measured to determine whether a system is in the failure
+regime. The ontological claim that some such $Z$ exists is guaranteed by construction
+and carries no empirical content; only the epistemological claim that $Z$ can be
+independently specified gives the framework diagnostic power. Candidate routes to an
+independently specified $Z$ include behavioral clustering of error types, probing
+studies of model internals, and difficulty-stratified benchmarks; the ErrorAtlas
+taxonomy shows such a priori specifications are achievable. Constructing a $Z$ that is
+both independently specified and informative enough to make
+Theorem~\ref{thm:info_bound} non-vacuous remains the key open empirical problem.
+
+The remaining results carry more direct practical content because their conditions are
+expressible in measurable probabilities. \cite{lin2024criticbench}'s CriticBench
+evaluates the same model on generation, binary critique, and correction for identical
+problems, so a pre-specified binary acceptance rule could recode its critique outcomes
+into estimates of $\Pr(A{=}1\mid T{=}0)$ and $\Pr(A{=}1\mid T{=}1)$; similarly,
+\cite{kadavath2022ptrue}'s P(True) scores could be thresholded at a pre-fixed
+$\theta_A$ to construct such rates. Neither source itself defines $\kappa$ or $\tau$.
+
+\begin{Lemma}[Post-Processing Cannot Add Evidence]
+\label{lem:post_processing}
+For any deterministic acceptance rule $A = \mathsf{acc}(S)$:
+\begin{equation}
+I(T; A \mid G) \leq I(T; S \mid G)
+\end{equation}
+\end{Lemma}
+
+This follows directly from the data processing inequality. The acceptance decision cannot
+contain more information than the selector score from which it derives.
+
+\subsection{Evidence Bound Formulation}
+
+\begin{Theorem}[Bounded Evidence from Acceptance]
+\label{thm:evidence_bound}
+Assume the selector has high false acceptance rate:
+\begin{equation}
+\Pr(A = 1 \mid T = 0) \geq 1 - \varepsilon
+\end{equation}
+and $\Pr(A = 1 \mid T = 1) \leq 1$. Then the log-likelihood ratio contributed by observing
+$A = 1$ satisfies:
+\begin{equation}
+\log_2 \frac{\Pr(A = 1 \mid T = 1)}{\Pr(A = 1 \mid T = 0)} \leq \log_2 \frac{1}{1 - \varepsilon}
+\end{equation}
+\end{Theorem}
+
+\begin{proof}
+We have $\Pr(A = 1 \mid T = 1) \leq 1$ and $\Pr(A = 1 \mid T = 0) \geq 1 - \varepsilon$,
+so:
+\begin{equation}
+\frac{\Pr(A = 1 \mid T = 1)}{\Pr(A = 1 \mid T = 0)} \leq \frac{1}{1 - \varepsilon}
+\end{equation}
+Taking $\log_2$ gives the result. 
+\end{proof}
+
+\begin{Corollary}[Degenerate Evidence for Small $\varepsilon$]
+For small $\varepsilon$:
+\begin{equation}
+\log_2 \frac{1}{1 - \varepsilon} \approx \frac{\varepsilon}{\ln 2} \approx 1.44\varepsilon
+\text{ bits}
+\end{equation}
+To illustrate the mathematical behavior of the bound: for $\varepsilon = 0.01$ (selector
+accepts 99\% of incorrect hypotheses), acceptance provides at most $0.014$ bits of evidence.
+For $\varepsilon = 0.35$ (a more moderate regime), the exact bound is $0.62$ bits
+(the small-$\varepsilon$ approximation gives $0.50$). These are mathematical illustrations of how the bound scales with $\varepsilon$, not
+empirical estimates; determining which regime applies to a given deployed system requires
+direct measurement of acceptance probabilities.
+\end{Corollary}
+
+Theorem~\ref{thm:evidence_bound} provides an \emph{upper} bound on evidence under high
+false acceptance; outside that regime acceptance may convey substantial evidence, and
+many successful LLM applications violate the preconditions by incorporating external
+feedback channels. The regime is directly measured: the MBPP point estimates
+$\hat\kappa=0.86$--$0.97$ of Section~\ref{sec:empirical} fall inside it; the HumanEval
+estimates do not, and the bound is not applied to them.
+
+\subsection{Sufficient Conditions for Positive Evidence}
+
+\begin{Proposition}[Conditions for positive evidence]
+\label{prop:multi_agent}
+Suppose a selector satisfies
+\begin{equation*}
+\Pr(A = 1 \mid T = 0) \leq 1 - \epsilon,\qquad
+\Pr(A = 1 \mid T = 1) \geq \delta
+\end{equation*}
+for some $\delta > 1 - \epsilon > 0$. Then acceptance by that selector provides
+\begin{equation}
+\log_2 \frac{\delta}{1 - \epsilon} > 0
+\end{equation}
+bits of evidence about correctness.
+\end{Proposition}
+
+\begin{proof}
+The log-likelihood ratio of $A=1$ is
+$\log_2 \frac{\Pr(A=1 \mid T=1)}{\Pr(A=1 \mid T=0)} \geq \log_2 \frac{\delta}{1-\epsilon}$,
+which is positive whenever $\delta > 1 - \epsilon$. 
+\end{proof}
+
+\begin{Remark}
+The proposition gives \emph{sufficient} conditions under which acceptance provides positive
+evidence, not necessary and sufficient conditions. Positive evidence requires only
+$\Pr(A=1 \mid T=1) > \Pr(A=1 \mid T=0)$; the $(\delta, \epsilon)$ parameterization makes
+the bound explicit and measurable. A selector meeting these conditions provides at least
+$\log_2(\delta/(1-\epsilon))$ bits; the actual evidence may be larger. The proposition
+additionally requires the selector to accept correct hypotheses at rate $\geq \delta >
+1-\epsilon$, since a trivially rejecting selector would satisfy the false-acceptance bound
+without being useful.
+\end{Remark}
+
+\subsection{Average Information and Naive-Confidence Miscalibration}
+
+The average-information ceiling and confidence miscalibration are different phenomena;
+the second requires an explicit observer model.
+
+\begin{Lemma}[Repeated Self-Critique Bound]
+\label{lem:repeated}
+Consider $k$ selector outputs $S_1, \ldots, S_k$ with acceptance decisions
+$A_i = \mathbf{1}\{S_i \geq \theta_A\}$. Assume $(S_1, \ldots, S_k) \perp T \mid (G, Z)$
+jointly. A sufficient condition is that the $S_i$ are mutually conditionally independent
+given $(T,G,Z)$, with each conditional law $\Pr(S_i\mid T,G,Z)$ independent of $T$.
+The resulting product is then free of $T$ for every $(G,Z)$, which implies the required
+joint conditional independence. Conditional independence given only $(G,Z)$, together with
+each separate condition $S_i\perp T\mid(G,Z)$, would not suffice. Then:
+\begin{equation}
+I(T; A_{1:k} \mid G) \leq I(T; Z \mid G)
+\end{equation}
+That is, $k$ critiques provide no more information about correctness than the single blind
+spot variable $Z$.
+\end{Lemma}
+
+\begin{proof}
+By the chain rule for conditional mutual information:
+\begin{equation}
+I(T; A_{1:k}, Z \mid G) = I(T; Z \mid G) + I(T; A_{1:k} \mid G, Z)
+\end{equation}
+Under the joint conditional independence assumption, $A_{1:k} \perp T \mid (G, Z)$, so
+$I(T; A_{1:k} \mid G, Z) = 0$, giving $I(T; A_{1:k}, Z \mid G) = I(T; Z \mid G)$.
+Also by the chain rule:
+\begin{multline}
+I(T; A_{1:k}, Z \mid G) = I(T; A_{1:k} \mid G) \\
++ I(T; Z \mid G, A_{1:k}) \geq I(T; A_{1:k} \mid G)
+\end{multline}
+since mutual information is nonnegative. Combining yields $I(T; A_{1:k} \mid G) \leq I(T; Z \mid G)$. 
+\end{proof}
+
+\begin{Remark}
+The joint independence assumption is strictly stronger than the individual conditions
+$S_i \perp T \mid (G,Z)$; individual conditional independence
+does not in general imply the joint statement. Fresh context alone does not establish the
+lemma's factorization sufficient condition.
+\end{Remark}
+
+\begin{Remark}[The ceiling bounds total information]
+\label{rem:marginal}
+Lemma~\ref{lem:repeated} should not be read as ``repeated evaluation is useless.'' The
+chain rule decomposes the bounded quantity into marginal contributions:
+\begin{multline*}
+I(T; A_{1:k} \mid G) \\
+= \sum_{i=1}^{k} I(T; A_i \mid G, A_{1:i-1}),
+\end{multline*}
+and the lemma constrains the sum, not the individual terms. Each critique can contribute
+substantial positive information on the way toward the ceiling; only the cumulative total
+is capped at $I(T; Z \mid G)$. Concretely, let $T = Z$ be fair binary with $G$
+uninformative about $T$, so the ceiling is $I(T;Z\mid G) = 1$ bit, and let each critique
+be an independent binary-symmetric reading of $Z$ with accuracy $0.7$. The conditional
+independence assumption holds, a single critique carries $\approx 1 - h_2(0.3) \approx 0.12$
+bits, subsequent marginal gains shrink as the ceiling is approached, and ten critiques
+carry $I(T;A_{1:10}) \approx 0.678$ bits (computed exactly from the binomial mixture),
+not the full bit. The lemma remains true throughout: the total
+never exceeds the ceiling.
+\end{Remark}
+
+\begin{Remark}[Average versus event-specific evidence]
+\label{rem:not_llr}
+The bounded quantity in Lemma~\ref{lem:repeated} is an \emph{average} mutual
+information. It is not a bound on the log-likelihood ratio of any particular sequence
+of decisions, and it does not follow that a confident posterior after repeated
+acceptance is unjustified. In the same binary-symmetric example, ten unanimous YES
+verdicts have likelihood ratio $(0.7/0.3)^{10}$, i.e.\ a log-likelihood ratio of
+$\approx 12.22$ bits, while $I(T;A_{1:10}) \approx 0.678$ bits. Both statements are
+true simultaneously: the posterior update on that particular sequence is large and
+statistically legitimate, because the readings really are conditionally independent
+given $T$ (here $T=Z$). What the lemma bounds is the information averaged over all
+$2^{10}$ verdict patterns, most of which are not unanimous. Consequently,
+Lemma~\ref{lem:repeated} on its own does \emph{not} establish false confidence
+amplification. Three distinct claims must be separated: (i) bounded average mutual
+information, which the lemma proves; (ii) dependence between evaluation outcomes,
+which is a property of the sampling model; and (iii) miscalibration caused by
+treating dependent evaluations as independent, which requires an explicit
+miscalibration statement and is the content of
+Proposition~\ref{prop:miscalibration} below.
+\end{Remark}
+
+\begin{Proposition}[Naive-independence miscalibration]
+\label{prop:miscalibration}
+This is a separate existence result, not a consequence of Lemma~\ref{lem:repeated}.
+It assumes evaluations are i.i.d.\ given $(T,Z)$, whereas the lemma assumes that the
+evaluation vector is conditionally independent of $T$ given $(G,Z)$. These are distinct
+sampling assumptions. Fix $G$ and suppress it, and define
+$a_z = \Pr(A_i{=}1 \mid T{=}1, Z{=}z)$ and $b_z = \Pr(A_i{=}1 \mid T{=}0, Z{=}z)$,
+and let $\rho = \Pr(T{=}1) \in (0,1)$. After $k$ unanimous acceptances, the true
+posterior odds are
+\[
+O_{\mathrm{true}}(k) \;=\; \frac{\rho}{1-\rho}\,
+\frac{\mathbb{E}[a_Z^{\,k} \mid T{=}1]}{\mathbb{E}[b_Z^{\,k} \mid T{=}0]},
+\]
+whereas an observer who wrongly treats the evaluations as independent given $T$
+alone, using the marginal rates $\bar a = \mathbb{E}[a_Z \mid T{=}1]$ and
+$\bar b = \mathbb{E}[b_Z \mid T{=}0]$, computes
+\[
+O_{\mathrm{naive}}(k) \;=\; \frac{\rho}{1-\rho}\left(\frac{\bar a}{\bar b}\right)^{k}.
+\]
+The two posteriors can disagree, but non-degeneracy alone does not imply disagreement:
+if $a_Z$ and $b_Z$ have identical distributions under their respective correctness
+classes, the odds coincide for every $k$ even when both are non-degenerate. Exponential divergence requires additional
+conditions. In particular, take $\bar a > \bar b > 0$ with
+$a_z \equiv a < 1$ constant and, under $T{=}0$, $b_Z = 1$ with probability $q$ (a
+shared blind spot: every evaluation accepts) and $b_Z = 0$ otherwise, so
+$\bar b = q < a$. Then
+\begin{gather*}
+\log O_{\mathrm{naive}}(k) = \log\tfrac{\rho}{1-\rho} + k\log\tfrac{a}{q}
+\;\longrightarrow\; +\infty, \\
+\log O_{\mathrm{true}}(k) = \log\tfrac{\rho}{1-\rho} + k\log a - \log q
+\;\longrightarrow\; -\infty .
+\end{gather*}
+The naive observer becomes arbitrarily confident that the output is correct while
+the true posterior odds of correctness vanish.
+\end{Proposition}
+
+\begin{proof}
+Conditional on $(T,Z)$ the $k$ acceptances are independent, so the likelihood of the
+unanimous sequence is $a_Z^k$ under $T{=}1$ and $b_Z^k$ under $T{=}0$; taking
+expectations over $Z$ gives $O_{\mathrm{true}}$. The naive observer replaces each
+$k$-th moment by the $k$-th power of a mean. In the two-point example,
+$\mathbb{E}[a_Z^k \mid T{=}1] = a^k$ and
+$\mathbb{E}[b_Z^k \mid T{=}0] = q\cdot 1^k + (1-q)\cdot 0 = q$ for every $k$, so
+$O_{\mathrm{true}}(k) = \frac{\rho}{1-\rho} a^k / q$; the limits follow from
+$a/q > 1$ and $0 < a < 1$.
+\end{proof}
+
+\paragraph{Intuition: what the failure mode actually is.}
+The failure is not that confident posteriors after repeated acceptance are inherently
+unjustified---Remark~\ref{rem:not_llr} gives a counterexample in which they are
+justified. The failure is a specific accounting error: an observer who treats
+$Z$-coupled evaluations as independent confirmations substitutes powers of means for
+means of powers, and in the blind-spot regime this substitution does not merely
+overshoot but flips the sign of the evidence. The subjective experience is $k$
+confirmations; the true likelihood of that unanimous sequence is dominated by a single
+shared cause whose probability does not shrink with $k$. Whether real evaluator
+populations sit in this sign-reversal regime is an empirical question; the experiments
+below measure the discrimination quantities $\kappa$ and $\tau$ that enter it, not $Z$
+itself.
+
+\paragraph{What the theory buys the experiments.} The proofs in this section are short;
+their function is to organize the measurement program of Section~\ref{sec:empirical}.
+The repeated-critique ceiling frames the repeated-evaluation and replication arms; the
+conditional-independence assumption marks what the moderation analysis and
+cross-evaluation matrix can and cannot reach; the evidence bound fixes the reporting of
+$E$ alongside the rates; and the necessity of falsifiable $Z$ marks the boundary beyond
+which these experiments cannot see. The theory organizes the measurements and identifies
+their limits; it is not what they test.
+
+\section{Experiments}
+\label{sec:empirical}
+
+\subsection{Protocol and Reproducibility}
+\label{sec:protocol}
+
+Both experiments instantiate the frozen-candidate principle of
+Section~\ref{sec:formalization}. Ground truth $T$ is assigned once by the benchmark's
+reference tests before any evaluation; every candidate is deterministically hashed and
+frozen; no candidate is selected, repaired, revised, or resampled as a function of
+correctness; and evaluator prompts forbid modification, repair, alternative solutions,
+and execution. The three evaluator conditions are: \textbf{self-check} (the same model
+judges its frozen candidate in a fresh context with a binary verdict),
+\textbf{steelman} (the same model produces the strongest case against and for the
+candidate before a final verdict), and an \textbf{execution-grounded positive control}
+(the evaluator receives only a binary PASS/FAIL signal from the reference-test
+mechanism that defines $T$---an oracle-grounded control, not an independent validation
+benchmark).
+
+The MBPP runs use a complete-response protocol: every API attempt is appended verbatim,
+before any parsing, to an immutable JSONL event ledger recording model, stage, task,
+request parameters, raw response text, provider metadata, and \texttt{finish\_reason};
+final attempts carry no \texttt{max\_tokens}-style parameter, and no response entering
+any denominator is truncated at our behest; a pair whose final attempt reaches the provider's own output ceiling is
+never regenerated and stays visible as a malformed record with a fixed denominator;
+verdict extraction accepts only a strict terminal \texttt{VERDICT: ACCEPT} or
+\texttt{VERDICT: REJECT} marker with no substring fallback. Across the five ledgers
+(production, repeated evaluation, replication, neutral control, cross-evaluation),
+93,261 API events are preserved, and every parsed verdict reproduces from preserved raw
+text. All generations and evaluations ran at temperature 0; GPT-5.4 used the same
+pinned snapshot as the HumanEval experiment (gpt-5.4-2026-03-05), and model identifiers
+and request parameters are recorded per event. All 164 archived HumanEval steelman
+prompts contain the no-repair and no-corrected-code instructions, and inspection of all
+code-fenced responses found candidate quotations or illustrative expressions, not a
+replacement implementation.
+
+The preserved harness, candidates, raw responses, parsed decisions, validators, and
+deterministic analysis scripts are public at
+\url{https://github.com/AndBrilliant/selfcorr-benchmarks} (commit
+\texttt{fcb3486}), with SHA-256 manifests over every artifact. The HumanEval contrasts
+reproduce from \path{scripts/humaneval/paired_contrasts.py}, the MBPP analyses from
+\path{scripts/mbpp_v2_analysis.py} and its companion scripts, and ledger integrity from
+\path{scripts/validate_mbpp_v2_pilot.py}.
+
+\subsection{HumanEval: Measuring the Diagnostic}
+
+The complete 164-task HumanEval benchmark~\cite{chen2021codex} supplies executable
+reference tests and a deterministic functional-correctness criterion. GPT-5.4
+(``gpt-5.4-2026-03-05'', temperature 0, reasoning effort ``none'') produced one frozen
+candidate per task: 155 correct, 9 incorrect.\footnote{Baseline generation was
+interrupted after initiating the request for HumanEval/85 but before any response was
+persisted. On resume, that task remained unfrozen and the identical request was
+reissued. No candidate content from the interrupted request was observed or used in the
+decision to reissue it.} The same 164 candidates were judged under
+self-check, steelman, and the execution-grounded control, all in fresh contexts. Wilson
+score intervals are used for the binomial rates, and marginal uncertainty in $\hat E$ is
+obtained by transforming a two-sided 95\% Koopman score interval for $\tau/\kappa$ with
+the Miettinen--Nurminen correction~\cite{koopman1984ratio,miettinen1985comparative};
+no pseudocount is added.
+
+\begin{table*}[tp]
+\caption{Paired evaluator acceptance on the identical frozen HumanEval corpus
+($N=164$: 155 correct, 9 incorrect). Wilson 95\% confidence intervals are shown for
+$\kappa$ and $\tau$. Log-likelihood evidence from acceptance is $E=\log_2(\tau/\kappa)$;
+its marginal intervals are transformed two-sided 95\% Koopman score intervals with the
+Miettinen--Nurminen correction. The execution arm has zero observed false acceptances, so
+its plug-in $\hat E$ and the upper interval endpoint are unbounded.}
+\label{tab:results}
+
+\begin{tabular}{l c c c c c}
+\hline
+\textbf{Evaluator} & \textbf{Wrong accepted} & $\hat{\kappa}$ [95\% CI] &
+\textbf{Correct accepted} & $\hat{\tau}$ [95\% CI] & $\hat{E}$ (bits) [95\% CI] \\
+\hline
+Self-check & 6/9 & 0.667 [0.354, 0.879] & 146/155 & 0.942 [0.893, 0.969] & 0.50 [0.09, 1.42] \\
+Steelman & 3/9 & 0.333 [0.121, 0.646] & 149/155 & 0.961 [0.918, 0.982] & 1.53 [0.57, 3.00] \\
+Execution-grounded & \textbf{0/9} & \textbf{0.000 [0.000, 0.299]} & 149/155 & \textbf{0.961 [0.918, 0.982]} & \textbf{$\infty$ $[1.68,\infty)$} \\
+\hline
+\end{tabular}
+\end{table*}
+
+The two internal arms are ordered in false acceptance: $\hat\kappa$ falls from $6/9$
+to $3/9$ while true acceptance rises from $146/155$ to $149/155$; the execution control
+rejects all nine incorrect candidates by construction. The discrimination gaps are
+$\hat\Delta=0.275$, $0.628$, and $0.961$. The oracle arm nevertheless rejects six
+PASS candidates, so its verdicts are not a mechanical relabeling of $T$. All six
+responses are a bare ``NO'' under a verdict-only prompt, so no rationale is preserved;
+five of the six candidates were also rejected by self-check and four by steelman.
+The arm thus sometimes overrides an external PASS with the same negative judgment
+issued by the internal arms. The steelman
+result is not a global shift toward skepticism: self-check and steelman each issued
+exactly 152 YES and 12 NO verdicts, but steelman placed its rejections more accurately,
+reducing false acceptance from $6/9$ to $3/9$ while reducing false rejection from
+$9/155$ to $6/155$. Within the nine incorrect candidates, five are accepted only by
+self-check and two only by steelman (exact McNemar $p=0.453$); execution grounding
+removed the remaining three steelman false acceptances, and across the endpoints it
+corrected 10 self-check evaluator errors while introducing 1 ($p=0.0117$). Evidence from acceptance is
+$0.50$ bits under self-check ($[0.09,1.42]$) and $1.53$ bits under steelman
+($[0.57,3.00]$); with zero false acceptances in the execution arm, the plug-in ratio is
+unbounded and the transformed score interval is $[1.68,\infty)$ bits---a finite lower
+endpoint, not a claim of infinite population evidence.
+
+A paired bootstrap (4,000-resample inverse-empirical-CDF percentile resampling within
+the nine-error and 155-correct strata, seed 20261104, no
+pseudocounts~\cite{efron1979bootstrap}; 100 of the 4,000 resamples yield infinite
+$\hat E$, so the finite upper endpoint depends on the quantile convention) gives
+steelman-minus-self-check contrasts of
+$\Delta\hat\kappa=-0.333$ $[-0.889,0.222]$, $\Delta\hat\tau=+0.019$
+$[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,3.26]$: the nominal,
+unadjusted interval includes no evidence gain, so the nine-error stratum cannot support
+a precise between-arm evidence estimate. HumanEval is therefore a clean paired
+demonstration of the diagnostic ordering, not a powered effect estimate;
+Section~\ref{sec:mbpp} supplies the powered counterpart.
+
+\paragraph{Context-separation comparison.} Because both internal arms use fresh
+contexts, they compare evaluator instructions, not context inheritance. Same-context
+evaluations replayed the original generation conversation and appended the evaluator
+instruction; the steelman variant differs in response-format instructions and parsing,
+so the comparison does not isolate context exactly. False acceptance was $6/9$ for
+same-context self-check and $4/9$ for same-context steelman, against $6/9$ and $3/9$
+fresh; true acceptance was $148/155$ and $148/155$ same-context versus $146/155$ and
+$149/155$ fresh. The steelman advantage appears in both contexts under these protocol
+variants, and the comparison provides no compelling support for a large fresh-context
+benefit while remaining inconclusive about moderate or general effects at nine errors.
+Context separation is retained as an engineering heuristic, not a validated mechanism.
+
+\subsection{MBPP: Five-Family Paired Measurement}
+\label{sec:mbpp}
+
+The HumanEval experiment pins precision by fixing the candidate corpus; the cost is a
+nine-task error stratum. As a complement, we measured the same two internal arms on 947
+MBPP tasks~\cite{austin2021mbpp} across five model families: DeepSeek-V4.1-Flash,
+GLM-5.3-Flash, Qwen-3.8-Flash, GPT-5.4, and GPT-6-Luna. One greedy candidate per
+(task, model) cell was generated, hashed, and frozen; ground truth was assigned before
+evaluation; and the frozen candidate was judged in fresh contexts under both arms. The
+MBPP steelman prompt is a critique-only variant, not verbatim identical to the
+HumanEval prompt; neither evaluator output is executed or used to recompute $T$.
+Generation accuracy among candidates with assigned ground truth is 54.3\% (GPT-5.4),
+57.8\% (DeepSeek), 67.3\% (GLM), 55.9\% (Qwen), and 54.2\% (GPT-6-Luna), giving
+incorrect strata of 308--434 per family. Both arms judge the same immutable candidate,
+so the arm comparison is paired at the task level and carries an exact McNemar test;
+because each family is judged on its own error distribution, cross-family rate
+comparisons remain descriptive, not a capability ranking.
+
+\begin{table*}[!t]
+\centering
+\caption{Fresh complete-response MBPP paired results, five model families. One greedy
+candidate per task, frozen and hashed before evaluation; both arms judge the same
+candidate in fresh contexts. ``Paired'' is the number of candidates with assigned
+ground truth and a terminal verdict from both arms; $n_{T=0}$ is the incorrect stratum
+of that paired set, and $\kappa=P(A^{\mathrm H}{=}1\mid T{=}0)$,
+$\tau=P(A^{\mathrm H}{=}1\mid T{=}1)$ are strict-verdict false- and true-acceptance
+rates with 95\% Wilson score intervals. $p_{\mathrm{Holm}}$ is the five-family
+Holm-adjusted value for the paired incorrect-stratum McNemar contrast. Malformed arms are excluded from paired denominators
+and reported as counts in the text, never imputed.}
+\label{tab:kappa_mbpp}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\hline
+Model & Tasks & Paired & $n_{T=0}$ & $\hat\kappa$ sc/st (\%) & $\hat\tau$ sc/st (\%) & $p_{\mathrm{Holm}}$ \\
+\hline
+DeepSeek-V4.1-Flash (cloud) & 947 & 917 & 389 & 96.9 [94.7,98.2] / 94.3 [91.6,96.2] & 98.9 [97.8,99.4] / 98.9 [97.8,99.4] & 0.261 \\
+GLM-5.3-Flash (cloud) & 947 & 917 & 299 & 89.0 [84.9,92.0] / 85.6 [81.2,89.1] & 97.6 [96.0,98.5] / 97.6 [96.0,98.5] & 0.328 \\
+Qwen-3.8-Flash (cloud) & 947 & 940 & 413 & 94.9 [92.4,96.7] / 90.6 [87.4,93.0] & 99.2 [98.1,99.7] / 97.3 [95.4,98.3] & $1.2\times10^{-2}$ \\
+GPT-5.4 (cloud) & 947 & 938 & 427 & 90.2 [87.0,92.6] / 88.5 [85.2,91.2] & 97.1 [95.2,98.2] / 95.1 [92.9,96.7] & 0.392 \\
+GPT-6-Luna (cloud) & 947 & 943 & 432 & 93.5 [90.8,95.5] / 86.8 [83.3,89.7] & 96.5 [94.5,97.8] / 93.3 [90.8,95.2] & $2.1\times10^{-6}$ \\
+\hline
+\end{tabular}}
+\end{table*}
+
+Table~\ref{tab:kappa_mbpp} gives the paired results at two orders of magnitude more
+error events than the HumanEval diagnostic. In every family the steelman arm accepts
+fewer incorrect candidates. The paired contrast is significant for Qwen ($b/c=26/8$,
+exact $p=2.9\times10^{-3}$) and GPT-6-Luna ($b/c=32/3$, exact $p=4.2\times10^{-7}$),
+and both survive Holm adjustment across the five families ($p_{\mathrm{Holm}}=0.0117$
+and $2.1\times10^{-6}$); the other three families show the same direction without
+significance. No overall-verdict McNemar contrast is significant in any family (all
+$p>0.11$), and no arm-by-correctness interaction reaches significance either
+(per-family Fisher homogeneity $p=0.41$--$0.49$), though that test is unpowered for
+establishing the absence of an interaction. The paired discrimination-gap change has a
+95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
+$[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
+discrimination improvement is established for GPT-6-Luna only; these intervals are
+per-family and unadjusted. True-acceptance cost is small and family-dependent: at most
+3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
+
+The practical reliability of accepted candidates moves correspondingly little: among
+candidates an arm accepts, the fraction correct is $55$--$70\%$ and improves by at most
+$1.0$ points under steelman (Qwen $57.2\%\rightarrow57.8\%$, GPT-6-Luna
+$55.0\%\rightarrow56.0\%$, GPT-5.4 flat at $56.3\%\rightarrow56.2\%$). A statistically
+detectable reduction in false acceptance therefore does not translate into a large
+improvement in the reliability of accepted solutions: better internal critique is not
+reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
+accepted candidates are only $0.4$--$1.9$ points more likely to be correct than the
+family's base generation accuracy. Absolute rates differ from the HumanEval measurement (86--97\%
+versus 33--67\% false acceptance); benchmarks, candidate-generating models, and
+incorrect-stratum sizes all differ, so only the ordering transfers descriptively, not
+the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
+\emph{every} reference assert (\path{scripts/mbpp_v2_error_severity_audit.py}). The
+$86$--$97\%$ levels may partly reflect conventions hidden from the evaluator rather
+than evaluator blind spots alone.
+
+On the paired incorrect stratum the two arms' joint acceptance is $80.3$--$92.0\%$
+across families, but the level alone is not evidence of association: both arms accept
+most incorrect candidates, so independence would already predict joint acceptance of
+$76.2$--$91.4\%$ from the marginals. The observed excess over the independence baseline
+is $+0.6$ to $+4.9$ percentage points per family (DeepSeek $+0.6$, Qwen $+2.7$,
+GPT-5.4 $+3.8$, GLM $+4.1$, GPT-6-Luna $+4.9$); only this excess, not the absolute
+level, measures association between the arms' decisions, and it identifies neither a
+latent $Z$ nor the conditional-independence assumptions of the theory.
+
+\subsection{Repeated Evaluation, Replication, and Moderation}
+
+\paragraph{Repeated evaluation.} Each frozen candidate was judged in three repeated
+calls per arm at temperature zero: the production verdict plus two fresh calls,
+adding 18,884 events. These are repeated provider calls, not independent draws
+from a controlled sampling model. Verdicts are highly
+stable: $89.7$--$96.9\%$ of candidates receive a unanimous verdict across three rounds,
+and agreement itself is informative: candidates accepted in all three rounds carry
+$27$--$44\%$ error, versus $48$--$81\%$ for candidates accepted in only one or two
+rounds (Table~\ref{tab:repeated}). Repeated confident acceptance therefore does add
+evidence about correctness on a fixed candidate, but the residual error of unanimous
+acceptance stays at $27$--$44\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances
+move the error rate from $45.7\%$ at baseline to $43.4\%$. This is an empirical stability property,
+not a measured information-theoretic ceiling: the latent bound is not identified, and
+these data do not show that further evaluations could not improve discrimination.
+Repeated-evaluation denominators are arm-specific: $n$ counts candidates with a parsed
+verdict in all three rounds of that arm and does not require a parsed verdict in the
+other arm, so it differs from the production paired stratum.
+
+\begin{table}[!t]
+\centering
+\caption{Repeated evaluation ($k{=}3$ rounds per arm, temperature zero).
+$n$ is the number of candidates with a parsed verdict in all three rounds;
+$e_{3/3}$ is the error rate among candidates accepted in all three rounds
+(with count); $e_{1:2}$ is the error rate among candidates accepted in one
+or two rounds (with count).}
+\label{tab:repeated}
+\begin{tabular}{llrrr}
+\hline
+Family & Arm & $n$ & $e_{3/3}$ (\%) & $e_{1:2}$ (\%) \\
+\hline
+GPT-5.4 & self-check & 947 & 43.4 (874) & 72.4 (29) \\
+ & steelman & 936 & 43.6 (808) & 48.1 (79) \\
+DeepSeek-V4.1-Flash & self-check & 910 & 40.3 (865) & 78.0 (41) \\
+ & steelman & 900 & 41.0 (847) & 71.1 (45) \\
+GLM-5.3-Flash & self-check & 890 & 27.3 (788) & 65.2 (92) \\
+ & steelman & 903 & 26.6 (793) & 67.0 (88) \\
+Qwen-3.8-Flash & self-check & 933 & 42.0 (879) & 80.9 (47) \\
+ & steelman & 928 & 41.2 (839) & 67.6 (74) \\
+GPT-6-Luna & self-check & 941 & 44.1 (866) & 68.1 (47) \\
+ & steelman & 946 & 43.0 (821) & 67.1 (70) \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Candidate replication.} A full replication generated a second greedy
+candidate for every (task, model) cell, so ground truth varies within cells. The two
+programs are token-identical in $33.9\%$ of cells (family range $2$--$82\%$), and
+correctness flips between replicas in $6.2\%$ of cells, so the replication introduces
+genuine candidate variation alongside a large identical-replica component whose
+agreement is guaranteed by construction. Evaluator verdicts repeat across the two
+candidates $89$--$97\%$ of the time, and an arm's error on one candidate predicts that
+the other is incorrect with very small Fisher $p$-values. That association must be
+benchmarked before it carries mechanistic weight: an always-accept evaluator would show
+the identical association whenever incorrectness persists across two attempts at the
+same task. Measured against this baseline, the headline association is largely task
+difficulty: the baseline $P(T_B{=}0\mid T_A{=}0)$ is already $75$--$99\%$ per family,
+and the observed $P(T_B{=}0\mid\text{arm errs on }A)$ sits at or below it in every
+cell. The verdict does contribute a small incremental signal beyond the first
+candidate's ground truth: conditional on $T_A{=}0$, a candidate the arm correctly
+rejects is followed by an incorrect replica only $53$--$93\%$ of the time, versus
+$76$--$99\%$ for a wrongly accepted one; the contrast is significant in 3 of the 10
+arm-family cells. Joint acceptance of both greedy draws carries the same
+error rate as accepting either ($25$--$44\%$ both versus $30$--$45\%$ either). The
+replication is therefore evidence of strong task-level persistence of incorrectness
+plus a modest evaluator-specific component, not evidence of shared blind spots.
+
+\paragraph{Registered moderation analysis.} We tested whether the arm association
+survives conditioning on visible, correctness-blind features. Five moderators (task
+provenance, prompt length, candidate length, entry-point arity, concept class) and an
+explicit decision rule were registered after production data collection began and
+before any stratified statistic was computed
+(\path{scripts/mbpp_v2_moderator_spec.md}, registration commit \texttt{0e16327}, an
+ancestor of the pinned repository commit; the spec file is unchanged since
+registration). Under the registered rule the association is persistent in all
+five families: the stratified $\phi$ is within $0.01$--$0.03$ of the crude value for
+every moderator (crude range $0.15$--$0.59$), and joint acceptance stays at or above
+$68\%$ in every stratum. Here $\phi$ is the self-check--steelman verdict association
+on the incorrect stratum, not a ground-truth effect. One moderator partially attenuates it: in the text-processing
+stratum $\phi$ drops to $0.07$--$0.30$ versus $0.42$--$0.46$ in the remaining
+candidates for three families. This rules out the five registered covariate
+explanations, not every candidate-difficulty account, and it is associational rather
+than a conditional-independence test.
+
+\subsection{Mechanism: Adversarial Content and Self-Leniency}
+\label{sec:mechanism}
+
+Two supplementary arms, run under the same complete-response protocol on the same
+frozen candidates, test the two natural explanations of the steelman improvement: added
+deliberation and self-specificity.
+
+\paragraph{Neutral re-examination control.} One neutral, non-adversarial step-by-step
+verification call per frozen candidate---same ledger, same strict verdict grammar, no
+output cap, realized completion tokens recorded---separates adversarial content from
+added deliberation. Table~\ref{tab:control} shows the result. The control
+false-acceptance rate lies between the two production arms for DeepSeek, GLM, and
+Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level for
+GPT-6-Luna. The paired control-versus-steelman contrast is significant for exactly one
+family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.026$;
+control using $0.99\times$ the steelman tokens): for Qwen, matched deliberation
+without adversarial framing accepts incorrect candidates at the self-check level:
+this neutral prompt at matched token use does not reproduce the steelman reduction,
+localizing Qwen's gain to the steelman protocol rather than deliberation alone. GPT-5.4
+shows the same direction with the computation imbalance reversed---control uses
+$1.44\times$ the steelman tokens yet accepts $90.6\%$ of incorrect candidates versus
+$88.5\%$ under steelman---but the paired contrast is not significant there ($p=0.14$). For GPT-6-Luna, control and
+steelman accept incorrect candidates at essentially the same rate ($85.8\%$ versus
+$86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
+re-engagement; that near-equality is not an equivalence result, and a modest
+adversarial-content contribution cannot be excluded. Across families the control
+falsifies the simplest ``more tokens did it'' account: equal or greater deliberation
+reproduces the self-check blind spot in the family with the clearest steelman gain. The
+control has measured computation, not fully matched computation (token ratios
+$0.65$--$1.44$), and even equal average token use does not establish identical
+computation per candidate.
+
+\begin{table}[!t]
+\centering
+\small
+\caption{Neutral re-examination control versus the two production arms on the
+triple-paired incorrect stratum (ground truth assigned, parsed verdict from all three
+arms; $n_{T=0}$ is its size per family). $\hat\kappa$ is false acceptance in percent;
+the token ratio is realized mean control-versus-steelman completion tokens; $b/c$
+counts discordant incorrect candidates (control accepts, steelman rejects versus the
+reverse); $p$ is the exact McNemar value for the control-versus-steelman contrast.}
+\label{tab:control}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccccc}
+\hline
+Family & $n_{T=0}$ & $\hat\kappa$ self & $\hat\kappa$ steel & $\hat\kappa$ ctrl & tok ratio & $b/c$ & $p$ \\
+\hline
+GPT-5.4 & 427 & 90.2 & 88.5 & 90.6 & 1.44$\times$ & 19/10 & 0.136 \\
+DeepSeek-V4.1-Flash & 386 & 96.9 & 94.3 & 95.1 & 0.65$\times$ & 16/13 & 0.711 \\
+GLM-5.3-Flash & 288 & 89.6 & 86.8 & 88.5 & 0.88$\times$ & 21/16 & 0.511 \\
+Qwen-3.8-Flash & 410 & 94.9 & 90.7 & 94.6 & 0.99$\times$ & 23/7 & \textbf{0.0052} \\
+GPT-6-Luna & 430 & 93.5 & 86.7 & 85.8 & 0.80$\times$ & 12/16 & 0.572 \\
+\hline
+\end{tabular}}
+\end{table}
+
+\paragraph{Cross-evaluation matrix.} Every frozen candidate was additionally judged by
+the four \emph{other} families in both arms (18,872 records; 399 malformed, reported
+with fixed denominators). Two findings follow. First, permissiveness is largely
+general, not self-specific: every evaluator accepts other families' incorrect
+candidates at high rates (cross false acceptance $73$--$94\%$ under self-check and
+$69$--$92\%$ under steelman), so false acceptance of incorrect code does not require
+the code to be one's own. Second, same-family evaluators are more permissive toward their own errors.
+Table~\ref{tab:cross_matrix} gives the full matrix. Candidate-paired discordance runs
+$2.5$--$7.4$ to one toward external evaluators rejecting errors that the generating
+family accepted, versus the reverse, and every task-clustered
+paired-bootstrap interval is above zero. A crossed logistic model with categorical
+evaluator and generator effects and task-clustered sandwich standard errors separates
+this same-family effect from each evaluator's general permissiveness: same-family
+acceptance of incorrect candidates remains elevated under self-check
+($\beta=1.078$, odds ratio $2.94$, $p=1.2\times10^{-36}$) and steelman
+($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Under self-check every
+evaluator remains significant after Holm adjustment; under steelman all five do
+(Qwen weakest, Holm-adjusted $p=0.025$). Prompts and decoding
+are identical across self- and cross-evaluation and never disclose authorship, so the
+difference is not a framing artifact; self-preference through familiarity with one's
+own phrasing remains a candidate mechanism for the excess. A second is
+self-consistency: the diagonal evaluator may be re-deriving the same greedy solution
+rather than recognizing authorship. Two families share a provider, so the matrix
+measures model-family effects, not provider independence; adding a same-provider
+indicator preserves the same-family effect (self-check odds ratio $2.06$,
+$p=3.5\times10^{-10}$; steelman odds ratio $1.49$, $p=3.3\times10^{-6}$).
+Cross rates also track error blatancy: the incorrect candidates of the highest-accuracy
+generator (GLM, whose error stratum is smallest at $n_{T=0}=289$) are rejected more by
+every evaluator than that evaluator's average over the other families (GLM self-check
+cross false acceptance $72.7$--$78.8\%$). The blind spot is therefore mostly an
+evaluator property with a measurable same-family excess on top.
+
+\begin{table}[!t]
+\centering
+\caption{Self-versus-external evaluator discordance on matched incorrect candidates
+(self-check arm). Rows are external evaluators, pooled over the four generator
+families. ``Ext rej, own acc'' counts candidates the external evaluator rejects
+while the generating family's own evaluator accepts (own family more permissive); the
+reverse column counts the opposite direction. $p$ is the exact two-sided McNemar value;
+the last column is the 95\% task-clustered paired-bootstrap interval for the net
+discordance count. Pooled McNemar $p$-values are reported for reference; the bootstrap
+is the primary inference.}
+\label{tab:cross}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccc}
+\hline
+Evaluator & Ext rej, own acc & Ext acc, own rej & $p$ & Task-clustered 95\% CI \\
+\hline
+GPT-5.4 & 201 & 50 & $1.2\times10^{-22}$ & $[122,178]$ \\
+DeepSeek-V4.1-Flash & 189 & 53 & $4.3\times10^{-19}$ & $[107,165]$ \\
+GLM-5.3-Flash & 340 & 46 & $1.6\times10^{-56}$ & $[257,331]$ \\
+Qwen-3.8-Flash & 148 & 59 & $5.2\times10^{-10}$ & $[63,116]$ \\
+GPT-6-Luna & 199 & 53 & $4.5\times10^{-21}$ & $[114,175]$ \\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{Full cross-evaluation false-acceptance matrix on incorrect candidates
+(self-check / steelman, percent). Rows are evaluators, columns are generators;
+diagonal cells are same-family evaluations. Denominators are arm-specific per cell
+and are archived in \texttt{crossed\_model\_results.json}.}
+\label{tab:cross_matrix}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\hline
+Evaluator & GPT-5.4 & DeepSeek & GLM & Qwen & GPT-6-Luna \\
+\hline
+GPT-5.4 & \textbf{90.1/88.5} & 88.6/85.3 & 74.7/76.9 & 81.9/84.3 & 88.5/89.8 \\
+DeepSeek & 79.0/79.4 & \textbf{96.9/94.4} & 80.4/77.2 & 87.1/89.2 & 86.7/87.4 \\
+GLM & 72.8/73.3 & 78.8/77.4 & \textbf{88.8/85.5} & 77.2/74.7 & 72.7/73.1 \\
+Qwen & 84.8/84.1 & 94.2/92.4 & 82.5/81.2 & \textbf{94.9/90.6} & 85.6/88.0 \\
+GPT-6-Luna & 82.1/75.8 & 88.9/84.6 & 73.2/69.2 & 87.5/81.5 & \textbf{93.5/86.9} \\
+\hline
+\end{tabular}}
+\end{table}
+
+\subsection{Boundaries of the Measurement}
+\label{sec:threats}
+
+\paragraph{HumanEval error stratum.} Nine incorrect candidates make every error flip
+worth 11 points of false-acceptance rate, and the paired bootstrap interval for the
+non-oracle contrast includes zero. HumanEval supplies the clean paired demonstration of
+the diagnostic ordering; all powered claims rest on MBPP.
+
+\paragraph{Missing-record sensitivity.} The paired MBPP analysis uses 4,655 of 4,735
+pairs; every excluded pair has exactly one ledger-recorded cause
+(Appendix~\ref{app:accounting}). GPT-6-Luna's adjusted result is unchanged under every
+extreme imputation of the missing pairs; Qwen's remains significant unless all three of
+its missing $T{=}0$ pairs are simultaneously maximally adversarial. The full bounds are
+in Appendix~\ref{app:accounting}.
+
+\paragraph{HumanEval call variability.} Run-to-run verdict stability was not estimated
+on HumanEval; the $4/9$ versus $3/9$ context-comparison contrast may partly reflect
+model-call variability even at temperature zero. The fresh MBPP ledger measures verdict
+stability directly (Section~\ref{sec:empirical}).
+
+\paragraph{MBPP specification and interface mismatch.} Generators and evaluators saw
+only the natural-language description and the entry-point name; the three reference
+asserts were never shown to either. The ground-truth label is therefore the benchmark's
+correctness criterion, not a judgment about reasonable alternative readings of the
+prose. The corpus is the frozen 947-task subset inherited from the earlier preserved
+build (of the canonical 974; the 27 excluded task ids and their provenance are archived
+in \path{data/MBPP.corpus-provenance.json}), and every kept task carries its canonical
+three reference asserts. The full-population severity audit shows 84.4\% of incorrect
+candidates fail \emph{every} reference assert: the dominant pattern is wholesale
+behavioral failure under the benchmark's own criterion, not a near-miss on one
+ambiguous test. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
+breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
+renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ crash at runtime
+(\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 runtime
+crashes, $80.2\%$ are \texttt{TypeError} (590/736;
+\path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). Missing or renamed entry points are therefore negligible, but this
+breakdown does not distinguish genuine wrong answers from defensible alternative
+readings of underspecified prose; the one-assert-visible Qwen control settles that
+question directly: on all 947 tasks, generation accuracy is $56.1\%$ with one example
+assert shown to both generator and evaluator, versus $55.9\%$ on the same tasks in
+production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
+steelman false acceptance is $92.9\%$ versus $90.6\%$. Hidden conventions therefore
+do not rescue generation or explain the evaluators' acceptance rates
+(\path{data/mbpp_v2/assert_visible_qwen/assert_visible_analysis_summary.txt}).
+
+\paragraph{Token-identical replicas.} The replication arm's two greedy candidates are
+token-identical in $33.9\%$ of cells (up to $82\%$ for GPT-5.4); for those cells,
+$T_B=T_A$ trivially and verdict repetition is partly guaranteed by construction. The
+replication is therefore interpreted through the conditional-on-$T_A{=}0$ contrast and
+the always-accept baseline, not through the headline Fisher associations.
+
+\paragraph{Open by construction.} Neither experiment identifies $Z$ or measures the
+latent information ceiling; that is the open problem stated in
+Section~\ref{sec:falsifiable_z}, not a defect the data could have repaired. The
+measured contrasts are properties of this two-arm battery under these prompts and the
+strict verdict grammar.
+
+\section{Design Principles for External Selection}
+\label{sec:architecture}
+
+We call evaluation \emph{external} when it uses a channel not fully controlled by the
+generator---a formal tool, an independent model, or a fresh instance of the same model;
+``external'' describes the channel, not the model. The contrapositive of the negative
+results then motivates a design heuristic, offered as a design target rather than a
+proved corollary:
+
+\begin{quote}
+\textbf{External Selection Design Heuristic.}
+Evaluation is more likely to provide substantial information about correctness when
+(1)~the selector accesses information not contained in $(G,Z)$, breaking the
+conditional independence $S\perp T\mid(G,Z)$; (2)~the selector's blind spots have low
+overlap with the generator's; and (3)~the selector satisfies the conditions of
+Proposition~\ref{prop:multi_agent}: bounded false acceptance and true acceptance
+exceeding that bound.
+\end{quote}
+
+\subsection{Selection Channels, Ranked by Independence Strength}
+
+\paragraph{Formal verification.} Proof assistants (Lean, Coq, Isabelle) and type
+checkers select under mathematical ground truth. The Prover Agent
+framework~\cite{baba2025prover} illustrates the channel concretely: an informal
+reasoning LLM coordinated with Lean achieved 88.1\% accuracy on MiniF2F, a new
+state of the art among methods using small language models at a substantially lower
+sample budget~\cite{baba2025prover}.
+Lean applies a criterion external to the language model's own confidence or reasoning
+trace---a qualitatively stronger source of independence than same-model context
+separation.
+
+\paragraph{Executable verification.} Unit tests, property-based tests, and simulation
+checks select under computational ground truth; the interpreter does not care how
+confident the generator was. This is the channel instantiated by the execution-grounded
+control in Section~\ref{sec:empirical}; its perfect separation there is by
+construction, since the signal derives from the same reference tests that define $T$,
+and it marks what a direct computational correctness channel buys.
+
+\paragraph{Numerical invariants and retrieval grounding.} Dimensional analysis,
+conservation laws, and sanity bounds select under physical ground truth; citation and
+quote verification against a fixed corpus selects under documentary ground truth.
+
+\paragraph{Independent critics.} Models with different training data, architectures, or
+optimization objectives have partially independent failure modes. The cross-evaluation
+matrix of Section~\ref{sec:mechanism} measures exactly this channel: external
+evaluators reject errors the generating family accepted at $2.5$--$7.4$ to one,
+but their absolute false-acceptance rates remain high, so independence is partial, not
+complete.
+
+\paragraph{Fresh-context evaluation as an engineering heuristic.} The same model under
+fresh context removes the generation trace but not the shared weights and training
+distribution, so it cannot establish the independence conditions above. The HumanEval
+context comparison provides no compelling support for a large fresh-context benefit
+and is inconclusive about moderate effects; \cite{tsui2025selfcorrection}'s ``Wait''
+intervention reduced the blind spot by 89.3\% through context perturbation, a
+performance result whose mechanism is not established. Context separation remains a
+low-cost intervention that alters the activation context even when it cannot alter the
+underlying weights, and is recommended on that basis rather than as a validated remedy.
+
+\begin{Definition}[Context separation]
+\label{def:context_sep}
+Two evaluation contexts are \emph{separated} if the evaluating context has no access to:
+(1) the generation trace (intermediate reasoning steps), (2) the prompt scaffolding
+(instructions that shaped generation), or (3) hidden state from the generation process.
+\end{Definition}
+
+\subsection{Why Independence Matters}
+
+Perfect independence is not required, but reduced joint false acceptance alone is not
+sufficient for evidence compounding. For unanimous acceptance, define
+$\tau_{1:k}=\Pr(A_{1:k}=1\mid T=1)$, $\kappa_{1:k}=\Pr(A_{1:k}=1\mid T=0)$, and
+$\Lambda_{1:k}=\tau_{1:k}/\kappa_{1:k}$. For positive rates,
+\begin{equation}
+\frac{\Lambda_{1:k}}{\Lambda_{1:k-1}}=
+\frac{\Pr(A_k=1\mid A_{1:k-1}=1,T=1)}
+{\Pr(A_k=1\mid A_{1:k-1}=1,T=0)},
+\end{equation}
+so the $k$-th acceptance adds positive incremental evidence exactly when this ratio
+exceeds one: joint true acceptance must decrease by a smaller factor than joint false
+acceptance. If decisions are mutually conditionally independent given $T$, then
+$\Lambda_{1:k}=\prod_{i=1}^k(\tau_i/\kappa_i)$, and a selector with $\tau_k>\kappa_k$
+adds positive evidence. Without that factorization, the conditional ratio above is the
+criterion: individual rates $(\tau_1,\kappa_1)=(0.9,0.6)$ give $\Lambda_1=1.5$, whereas
+joint rates $(0.2,0.3)$ give $\Lambda_{1:2}=2/3$ despite reduced joint false
+acceptance. Diverse multi-agent panels can therefore help when their aggregation
+improves these likelihood ratios~\cite{du2023debate, liang2023debate}; reduced joint
+failure probability alone does not establish that mechanism. Persona-based
+diversity---casting the evaluator as a rigorous mathematician, a skeptical physicist,
+or a hostile referee---is a cheap single-model attempt at the same effect, since each
+persona predicts a different distribution of expert behavior with different blind
+spots; whether it yields acceptance rates satisfying
+Proposition~\ref{prop:multi_agent} is an open question.
+
+\subsection{Architecture and Mitigations}
+
+The principles organize around three functions: high-entropy generation to explore the
+hypothesis space, external selection to filter candidates under criteria the
+generator's blind spots cannot corrupt, and feedback to update generation based on what
+survives selection. The selector's criteria form a hierarchy: formal (does it compile,
+prove, or type-check?), executable (does it pass tests?), numerical (does it satisfy
+invariants?), grounded (do citations check out?), and adversarial (does it survive
+independent critique?). The feedback component records which constraints killed
+candidates, preserves surviving patterns as templates, and escalates ambiguous
+survivors to human review. This is a design proposal, not a validated system:
+Section~\ref{sec:empirical} tests the evaluation components, not the integrated
+architecture.
+
+The failure modes of such a pipeline are themselves selection problems. Correlated
+critics reintroduce the original blind spot through the back door; prompt injection on
+the selection channel can manipulate verdicts; spoofable external checks (doctored
+test harnesses, retrieval poisoning) convert an independence assumption into an attack
+surface; and feedback gaming lets generators optimize for the selector rather than for
+correctness. The mitigations follow the same independence principle: diverse selection
+criteria with periodic architecture audits, independent sanitization before evaluation,
+multiple independent checkers, human review of accepted candidates, and criteria
+rotation so the feedback channel cannot be overfit.
+
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{LLM self-correction.} \cite{huang2024selfcorrect} provide the foundational
+negative result: LLMs struggle to self-correct without external feedback, and in some
+settings self-correction degrades performance. \cite{tyen2024llmsstepbystep} find that
+models often fail to locate logical errors in reasoning, even in objective settings,
+while their ability to correct an error improves substantially when the error location
+is supplied. \cite{tsui2025selfcorrection}
+supply the closest empirical anchor: models correct identical errors presented as
+external input but fail on the same errors in their own outputs, at an average 64.5\%
+failure rate across 14 models on three purpose-built benchmarks (SCLI5, GSM8K-SC,
+PRM800K-SC), and the ``Wait'' intervention reduced the blind spot by 89.3\%. We treat
+these findings as empirical context rather than formal validation: the mapping between
+``failure to self-correct'' and the theorem's formal quantities is not established, and
+the mechanism by which ``Wait'' produces its effect is not identified by the
+performance evidence. Where we provide theoretical conditions under which
+self-evaluation may fail, Tsui provides empirical measurement of failure rates and a
+candidate intervention whose mechanism remains to be characterized.
+
+\paragraph{Correlated errors and evaluator bias.} \cite{kim2025correlated} find,
+across 350+ LLMs, that model pairs agree on the same wrong answer approximately 60\%
+of the time when both err, with shared provider, shared architecture, and higher
+capability each associated with higher error correlation, alongside larger and more
+accurate models. Their cross-generator
+agreement measurement is not equivalent to an evaluator accepting a generator's
+incorrect answer, so it does not directly instantiate our high-$\kappa$ condition; it
+motivates checking for coupled evaluation failures. \cite{wataoka2024selfpreference}
+and \cite{li2024llmjudgebias} document self-preference and related LLM-as-a-judge
+biases, consistent with the self-leniency excess measured in our cross-evaluation
+matrix.
+
+\paragraph{Verification and external feedback.} \cite{wang2023selfconsistency}
+demonstrated that sampling multiple reasoning paths and taking the majority answer
+improves accuracy. The standard Condorcet-style calculation gives sufficient conditions
+for aggregation gains under its independent-error and voter-competence assumptions, not
+necessary conditions for every joint voting model: correlated samples can still improve
+a vote, and a scalar error correlation does not by itself determine the majority-error
+probability. If every sample deterministically repeats the same answer, voting adds no
+diversity. More generally, the effect depends on the joint distribution of answers and
+errors, including whether incorrect votes concentrate on one alternative. Our analysis
+therefore motivates measuring that joint failure structure rather than assuming a
+universal monotone gain from decorrelation. Multi-agent debate and verification
+frameworks~\cite{du2023debate, liang2023debate} introduce altered evaluation channels,
+with effectiveness depending on how much independent information they supply;
+\cite{gou2023critic}'s CRITIC framework showed that tool augmentation improves
+evaluation through external feedback, and \cite{chen2024reconcile} found that model
+diversity among agents improves reconciliation.
+\cite{lightman2023process} showed that
+per-step process supervision outperforms outcome supervision in their
+mathematical-reasoning setting: an example of an external signal entering at a finer
+granularity than final-answer self-evaluation.
+\cite{krogh1995ensemble} established the classical ensemble-diversity result on which
+the independence argument rests, and \cite{cover2006elements} supply the
+information-theoretic background. \cite{alphafold} provides an analogy from a domain in which predictions are evaluated
+against experimentally determined protein structures and quantitative structural
+benchmarks; it does not itself test the self-evaluation mechanism studied here.
+
+\paragraph{Apparent counterexamples.} Successful iterative-improvement systems are
+not necessarily counterexamples to this diagnostic. Self-Refine~\cite{madaan2023selfrefine}
+studies iterative self-feedback across generation and reasoning tasks;
+Reflexion~\cite{shinn2023reflexion} augments agents with verbal feedback and memory;
+and Constitutional AI~\cite{bai2022constitutional} uses an explicit constitution and
+AI-generated critique and preference signals. These settings differ from the narrower
+question studied here: whether an evaluator can reliably assign a correctness verdict
+to a frozen candidate without an independently grounded correctness channel. When
+\cite{huang2024selfcorrect} removed oracle feedback from self-correction setups,
+improvements vanished.
+
+\section{Conclusions}
+
+The paper separates three questions that are often conflated: whether a model can
+generate a correct answer, whether it can recognize its own errors under an internal
+evaluation procedure, and how its selection behavior changes when an external
+correctness channel is introduced. On the frozen HumanEval cohort and the five MBPP
+families, internal evaluation accepts most incorrect candidates even after structured
+critique, and accepted candidates remain only $55$--$70\%$ correct; only the external
+correctness channel sharply separates correct from incorrect. Steelman evaluation
+reduces false acceptance in every family, but the reduction is protocol-specific and
+mechanistically split: Qwen's neutral re-examination prompt fails to reproduce the
+steelman reduction at matched token use, while GPT-6-Luna's neutral and steelman rates
+are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
+families' incorrect candidates, with a same-family
+acceptance excess in every evaluator under self-check and in all five under
+steelman. Repeated unanimous acceptance carries $27$--$44\%$ residual
+error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
+rates alone predict.
+
+The theory is conditional and concerns average information: under joint conditional
+independence, $k$ rounds of self-critique provide mutual information bounded by what
+the shared latent variable $Z$ mediates; the separate miscalibration proposition shows
+how an observer treating coupled evaluations as independent can become arbitrarily
+confident in errors; and the positive-evidence proposition gives the constructive counterpart,
+a quantifiable evidence floor from measurable acceptance rates. Neither experiment
+identifies $Z$ or measures the latent ceiling, and constructing an independently
+specified, informative $Z$ remains the key open problem. The framework's value is
+diagnostic rather than absolute: it identifies the failure quantity that matters---acceptance
+of incorrect outputs---and the design principle that follows: validate through a channel with independent
+correctness access.
+
+\paragraph{Open problems.} Constructing an independently specified, informative $Z$
+(Section~\ref{sec:falsifiable_z}); a pre-specified self-defense control alongside the
+steelman, with realized tokens and cost reported and the primary paired comparison
+pre-registered; testing the joint conditional-independence relation under explicit
+candidate-level coarsening; verdict-stability estimation at small scale; and measuring
+whether persona-based diversity yields acceptance rates satisfying
+Proposition~\ref{prop:multi_agent}.
+
+\section*{Acknowledgment}
+The author thanks the anonymous reviewers for helpful feedback and Joe Reid for
+infrastructure buildout and design. This research received no external funding. The
+empirical measurements used the public HumanEval and MBPP benchmarks. The preserved
+benchmark harness, ledgers, and audit artifacts are publicly available at
+\texttt{https://github.com/\allowbreak AndBrilliant/\allowbreak selfcorr-benchmarks}
+(commit \texttt{fcb3486}). The author declares no conflicts of interest.
+
+Use of AI tools: AI-assisted tools were used during manuscript preparation for language
+editing and drafting support. All ideas, methodology, theorems, and technical content
+are the author's own work, and the author takes full responsibility for the accuracy,
+originality, and integrity of the submitted content.
+
+\appendices
+
+\section{Ledger Accounting and Sensitivity}
+\label{app:accounting}
+
+The paired MBPP analysis uses 4,655 of 4,735 pairs; every excluded pair is accounted
+for by a single cause recorded in the ledger (Table~\ref{tab:accounting}). The 67
+output-ceiling pairs (17 generation-side, 50 evaluator-side) are restored malformed
+records: their final attempt terminated at the provider's output ceiling
+(\texttt{finish\_reason=length}), a deterministic degenerate output pattern at
+temperature zero, and they were never retried or recoded. The 80 pairs excluded from
+the paired analysis additionally include 13 pairs whose API call completed cleanly but
+whose response did not match the strict verdict grammar (9 GPT-5.4 steelman, 4
+GPT-6-Luna self-check): extraction failures, not provider failures, kept visible under
+the same rule. Arm-level, the ledger's 9,470 evaluator arms are 9,370 parsed, 66
+malformed, and 34 not-run (the 17 generation-failed pairs' two arms each). No record
+is dropped silently in any category. Two supplementary ledgers extend the battery
+under the same protocol: the neutral-verification control arm (4,718 records, 6,965
+events, 29 malformed) and the cross-evaluation matrix (18,872 records, 38,295 events,
+399 malformed), each with its own SHA-256 manifest. During the control run the OpenAI
+key was invalidated mid-run; the 747 affected GPT-5.4 tasks were re-run after key
+replacement, and the auth-failure records remain preserved in
+\path{auth_failed_records.jsonl} alongside the event-id repair log.
+
+\begin{table}[!t]
+\centering
+\caption{MBPP fixed-denominator accounting, 4,735 pairs. Categories are
+disjoint and exhaustive; every excluded pair has exactly one ledger-recorded
+cause. ``Grammar'' means the API call completed cleanly but the response
+carried no strict terminal verdict.}
+\label{tab:accounting}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\hline
+Family & Paired & Generation & \multicolumn{3}{c}{Evaluator-arm exclusions} \\
+ & & (ceiling) & ceiling & grammar & arms \\
+\hline
+GPT-5.4 & 938 & 0 & 0 & 9 & sc:0, st:9 \\
+DeepSeek-V4.1-Flash & 917 & 9 & 21 & 0 & sc:9, st:10, both:2 \\
+GLM-5.3-Flash & 917 & 5 & 25 & 0 & sc:15, st:10 \\
+Qwen-3.8-Flash & 940 & 3 & 4 & 0 & st:3, both:1 \\
+GPT-6-Luna & 943 & 0 & 0 & 4 & sc:4 \\
+\hline
+Total & 4,655 & 17 & 50 & 13 & 80 excl.\\
+\hline
+\end{tabular}}
+\end{table}
+
+Because missing verdicts are excluded rather than imputed, the paired FAR McNemar
+contrast is bounded under the most adversarial extreme imputation (every missing pair
+assigned to maximize discordance against steelman). GPT-6-Luna's adjusted result is
+unchanged under any imputation of its missing pairs (worst-case
+$p_{\mathrm{Holm}}=3.7\times10^{-5}$). Qwen's survives unless all three of its missing
+$T{=}0$ pairs are simultaneously maximally adversarial (worst-case
+$p_{\mathrm{Holm}}=0.080$; any imputation with at most two adversarial pairs keeps
+$p_{\mathrm{Holm}}\le0.045$). The three non-significant families remain
+non-significant under every imputation.
+
+\section{A Predictive Interpretation}
+\label{app:mechanism}
+
+The information-theoretic results establish \emph{that} self-evaluation can fail under
+correlated error; this appendix offers one interpretation of \emph{why} such
+correlation may be elevated in language models. The account is consistent with the
+formal analysis but does not depend on it.
+
+\cite{bender2021parrots} characterize language models as systems that stitch together
+sequences of linguistic forms according to probabilistic information about how they
+combine, without reference to meaning. Under this framing, when asked to evaluate a
+hypothesis, a language model predicts what evaluative text would likely follow the
+prompt, inheriting whatever patterns characterize human evaluation behavior in the
+training distribution: prestige deference, format heuristics, social smoothing, and
+narrative continuation. Alignment training shifts \emph{which} human behavior is
+predicted but may not change the underlying operation: \cite{sharma2024sycophancy}
+demonstrate that RLHF-trained models systematically exhibit sycophancy and that human
+preference judgments favor sycophantic responses, creating a training signal toward
+agreement. Commercial systems commonly use ``helpful assistant'' role framing rather than a
+rigorous evaluation protocol~\cite{zheng2023helpful}.
+
+One observable phenomenon follows: \emph{format consistency}. We hypothesize that
+submitting manuscripts of widely varying quality to major language models with neutral
+prompts will yield near-uniform response format---balanced positive and negative points
+regardless of input quality. This hypothesis is stated in falsifiable form to invite
+experimental follow-up; it is not an established result. The behaviors above are
+defaults, not constraints: prompt design substantially affects model behavior, with
+performance differences of up to 76 percentage points in the few-shot LLaMA-2-13B
+experiments of \cite{sclar2024formatting} and accuracy gains from role
+framing~\cite{kong2023roleplay}. If generation runs under a ``helpful assistant''
+framing and evaluation under the same framing, error-correlation risk is structurally
+elevated, since both are shaped by the same training signal; context separation may
+help because a fresh context with explicit critic framing resets the prediction
+target, potentially reducing the shared context-level component of $Z$.
+
+
+\section{Prompts and Decoding Settings}
+\label{app:prompts}
+
+All MBPP calls used temperature zero. The request payloads contained no
+reasoning-effort field and no output-length cap; provider defaults therefore apply.
+Model identifiers were \texttt{gpt-5.4} (the API alias resolving to the pinned
+\texttt{gpt-5.4-2026-03-05} snapshot),
+\texttt{deepseek/deepseek-v4.1-flash}, \texttt{z-ai/glm-5.3-flash},
+\texttt{qwen/qwen3.8-flash}, and \texttt{openai/gpt-6-luna}. The HumanEval
+snapshot and reasoning setting are given in Section~\ref{sec:empirical}.
+
+The MBPP self-check prompt was:
+\begin{quote}\scriptsize\ttfamily\raggedright
+You are evaluating one immutable Python candidate solution.
+
+[PROBLEM]
+{task prose and entry-point name}
+
+[CANDIDATE]
+{frozen code}
+
+Analyze whether the candidate satisfies the specification. Do not modify,
+repair, rewrite, or provide an alternative solution. End with exactly
+one final line containing only one of:
+VERDICT: ACCEPT
+VERDICT: REJECT
+\end{quote}
+
+The MBPP steelman prompt was:
+\begin{quote}\scriptsize\ttfamily\raggedright
+You are a neutral arbiter judging a debate between two expert Python programmers.
+
+[PROBLEM]
+{task prose and entry-point name}
+
+[CANDIDATE]
+{frozen code}
+
+Do the following in order:
+1. STEELMAN AGAINST: give the strongest case that the candidate is wrong.
+2. STEELMAN FOR: give the strongest case that the candidate is correct.
+3. Decide which case survives scrutiny. Judge only the candidate as given;
+   do not provide a corrected version.
+End with exactly one final line containing only one of:
+VERDICT: ACCEPT
+VERDICT: REJECT
+\end{quote}
+
+The neutral-control prompt was:
+\begin{quote}\scriptsize\ttfamily\raggedright
+You are performing a careful neutral verification of one immutable Python
+candidate solution.
+
+[PROBLEM]
+{task prose and entry-point name}
+
+[CANDIDATE]
+{frozen code}
+
+Verify the candidate against the specification step by step: check the logic,
+trace the behavior on the requirements, and confirm whether it satisfies the
+specification. Do not modify, repair, rewrite, or provide an alternative
+solution, and do not presume the candidate is correct or incorrect; verify it.
+End with exactly one final line containing only one of:
+VERDICT: ACCEPT
+VERDICT: REJECT
+\end{quote}
+
+The production self-check wording said ``specification and tests''; the three
+reference asserts were nevertheless not shown to the evaluator, so ``tests''
+referred to the hidden ground-truth criterion rather than visible evidence. The
+one-assert-visible control adds one example assert to both generator and
+evaluator. The cross-evaluation arms used the same self-check and steelman
+prompts verbatim for every evaluator--generator pair.
+
+\bibliographystyle{BibTeXtran}
+\bibliography{refs}
+
+\end{document}
+

@@ -35,6 +35,10 @@ Bootstrap intervals are seeded (see the scripts); reruns are bit-identical.
 Scripts overwrite the derived `analysis/` outputs they own, so run them in a
 copy of the repo if you want to compare against the shipped outputs.
 
+## Manuscript
+
+`manuscript/main.tex` is the LaTeX source of the paper these data support (compiled with `IAENGtran.cls`/`BibTeXtran.bst`; `refs.bib` alongside). Every number quoted in the manuscript is derivable from this repository's ledgers via the scripts above.
+
 ## Data layout
 
 Each ledger is newline-delimited JSON. `events.jsonl` holds every provider call

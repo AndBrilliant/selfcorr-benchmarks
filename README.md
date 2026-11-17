@@ -20,15 +20,17 @@ ledgers. Python 3.9+, stdlib only, except: `numpy` + `scipy`
 also regenerate data, which is not required to reproduce any number).
 
 ```bash
-python3 scripts/mbpp_v2_analysis.py                # main paired production analysis
+python3 scripts/mbpp_v2_error_severity_audit.py    # executes candidates vs reference asserts
+python3 scripts/mbpp_v2_failure_types.py           # failure-type breakdown of incorrect candidates
+python3 scripts/mbpp_v2_analysis.py                # main paired production analysis (run last among
+                                                   # the three; it writes data/mbpp_v2/analysis/manifest.sha256
+                                                   # covering every file in that directory)
 python3 scripts/mbpp_v2_accounting.py              # fixed-denominator accounting + imputation bounds
 python3 scripts/mbpp_v2_control_analysis.py        # neutral-verification control arm
 python3 scripts/mbpp_v2_tier1_analysis.py          # repeated evaluation + candidate replication
 python3 scripts/mbpp_v2_cross_analysis.py          # crossed-matrix discordance + bootstrap CIs
 python3 scripts/mbpp_v2_crossed_model.py           # crossed evaluator x generator model
 python3 scripts/mbpp_v2_moderator_analysis.py      # task-moderator (task-source) analysis
-python3 scripts/mbpp_v2_error_severity_audit.py    # executes candidates vs reference asserts
-python3 scripts/mbpp_v2_failure_types.py           # failure-type breakdown of incorrect candidates
 python3 scripts/mbpp_v2_assert_visible_analysis.py # one-assert-visible Qwen control
 python3 scripts/humaneval/paired_contrasts.py      # HumanEval paired contrasts
 ```

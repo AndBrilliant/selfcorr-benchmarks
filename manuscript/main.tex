@@ -862,12 +862,14 @@ survives conditioning on visible, correctness-blind features. Five moderators (t
 provenance, prompt length, candidate length, entry-point arity, concept class) and an
 explicit decision rule were registered after production data collection began and
 before any stratified statistic was computed
-(\path{scripts/mbpp_v2_moderator_spec.md}, registration commit \texttt{0e16327}, an
-ancestor of the pinned repository commit; the spec file is unchanged since
-registration). Under the registered rule the association is persistent in all
+(the specification file \path{scripts/mbpp_v2_moderator_spec.md} in the pinned
+repository commit is byte-identical to the registered version). Under the registered
+rule the association is persistent in all
 five families: the stratified $\phi$ is within $0.01$--$0.03$ of the crude value for
 every moderator (crude range $0.15$--$0.59$), and joint acceptance stays at or above
-$68\%$ in every stratum. Here $\phi$ is the self-check--steelman verdict association
+$68\%$ in every stratum with at least ten paired incorrect candidates
+(smallest qualifying stratum $n=13$ at $77\%$; the lone exception is a
+one-observation stratum at $0\%$). Here $\phi$ is the self-check--steelman verdict association
 on the incorrect stratum, not a ground-truth effect. One moderator partially attenuates it: in the text-processing
 stratum $\phi$ drops to $0.07$--$0.30$ versus $0.42$--$0.46$ in the remaining
 candidates for three families. This rules out the five registered covariate

@@ -14,8 +14,10 @@ incorrect candidates, two evaluators) supplies the clean paired demonstration.
 ## Reproduce the paper's numbers
 
 Everything reported in the paper regenerates deterministically from the released
-ledgers. Python 3.9+, stdlib only, except `scipy` (one script) and `openai`
-(only if you also regenerate data, which is not required to reproduce any number).
+ledgers. Python 3.9+, stdlib only, except: `numpy` + `scipy`
+(`scripts/humaneval/paired_contrasts.py`); `numpy` + `pandas` + `scipy` +
+`scikit-learn` (`scripts/mbpp_v2_crossed_model.py`); and `openai` (only if you
+also regenerate data, which is not required to reproduce any number).
 
 ```bash
 python3 scripts/mbpp_v2_analysis.py                # main paired production analysis

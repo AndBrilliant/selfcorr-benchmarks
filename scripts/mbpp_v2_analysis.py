@@ -204,8 +204,9 @@ def write_outputs(result: dict, out: Path) -> None:
 
     manifest = out / "manifest.sha256"
     entries = []
-    for path in sorted((json_path, summary_path, table_path)):
-        entries.append(f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}")
+    for p in sorted(out.iterdir()):
+        if p.is_file() and p.name != "manifest.sha256":
+            entries.append(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}")
     manifest.write_text("\n".join(entries) + "\n", encoding="utf-8")
 
 

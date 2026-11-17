@@ -48,7 +48,13 @@ copy of the repo if you want to compare against the shipped outputs.
 Each ledger is newline-delimited JSON. `events.jsonl` holds every provider call
 with its full raw response, usage, finish reason, and prompt/response hashes.
 Record files hold one row per (model, task) with ground truth, both arm verdicts,
-and extraction status.
+and extraction status. Production ground truth is defined by the operational
+harness, which applies a conservative static guard before execution: candidates
+whose code references `compile()`, `getattr()`, or `import sys` are labeled
+incorrect without being run. Six of the 1,987 labeled-incorrect candidates
+(0.3%) pass every reference assert when executed outside the guard; the frozen
+labels stand, and no incorrect-candidate-based rate in the paper can shift by
+more than 0.3 percentage points under either labeling.
 
 - `data/mbpp_v2/production/` — 4,735 pairs, both arms (9,470 evaluator arms)
 - `data/mbpp_v2/control/` — neutral-verification control arm (4,718 records; 6,965 events, of which 2,241 are preserved HTTP 401 auth failures from a mid-run API-key invalidation on the GPT-5.4 arm; the 747 affected tasks were re-run after key replacement and all have valid final records)

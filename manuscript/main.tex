@@ -60,8 +60,8 @@ for same-family evaluators after evaluator and generator fixed effects, and the
 effect survives a same-provider control. A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert, mostly wrong values
 ($62.8\%$) and crashes ($37.0\%$). Consistent with the amplification proposition,
-repeated unanimous acceptance leaves $27$--$44\%$ residual error, and accepted
-candidates remain only $55$--$70\%$ correct.
+repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual error, and on
+MBPP accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
 
 \begin{IAENGkeywords}
@@ -618,7 +618,7 @@ replacement implementation.
 The preserved harness, candidates, raw responses, parsed decisions, validators, and
 deterministic analysis scripts are public at
 \url{https://github.com/AndBrilliant/selfcorr-benchmarks} (commit
-\texttt{fcb3486}), with SHA-256 manifests over every artifact. The HumanEval contrasts
+\texttt{fcb3486}), with SHA-256 manifests over every released data artifact. The HumanEval contrasts
 reproduce from \path{scripts/humaneval/paired_contrasts.py}, the MBPP analyses from
 \path{scripts/mbpp_v2_analysis.py} and its companion scripts, and ledger integrity from
 \path{scripts/validate_mbpp_v2_pilot.py}.
@@ -1031,16 +1031,25 @@ model-call variability even at temperature zero. The fresh MBPP ledger measures 
 stability directly (Section~\ref{sec:empirical}).
 
 \paragraph{MBPP specification and interface mismatch.} Generators and evaluators saw
-only the natural-language description and the entry-point name; the three reference
+only the natural-language description and the entry-point name; the reference
 asserts were never shown to either. The ground-truth label is therefore the benchmark's
 correctness criterion, not a judgment about reasonable alternative readings of the
 prose. The corpus is the frozen 947-task subset inherited from the earlier preserved
 build (of the canonical 974; the 27 excluded task ids and their provenance are archived
-in \path{data/MBPP.corpus-provenance.json}), and every kept task carries its canonical
-three reference asserts. The full-population severity audit shows 84.4\% of incorrect
+in \path{data/MBPP.corpus-provenance.json}), and reference-assert counts per kept task are three in 936 of
+the 947 tasks, with the remaining eleven carrying four to six (per-task counts are
+archived in the severity audit ledger). The full-population severity audit shows 84.4\% of incorrect
 candidates fail \emph{every} reference assert: the dominant pattern is wholesale
 behavioral failure under the benchmark's own criterion, not a near-miss on one
-ambiguous test. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
+ambiguous test. Six of the 1,987 (0.3\%) warrant an explicit reconciliation note:
+the production harness applies a conservative static guard that rejects, before
+execution, any candidate whose code references \texttt{compile()},
+\texttt{getattr()}, or \texttt{import sys}, and these six were blocked at that
+stage. Executed outside the guard, each passes every reference assert for its
+task. Ground truth is defined by the operational harness, so the frozen labels
+stand; but because the guard-free reading would move these six to the correct
+pool, no incorrect-candidate-based rate in this paper can shift by more than
+$0.3$ percentage points under either labeling. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
 breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
 renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ crash at runtime
 (\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 runtime
@@ -1101,9 +1110,10 @@ separation.
 \paragraph{Executable verification.} Unit tests, property-based tests, and simulation
 checks select under computational ground truth; the interpreter does not care how
 confident the generator was. This is the channel instantiated by the execution-grounded
-control in Section~\ref{sec:empirical}; its perfect separation there is by
-construction, since the signal derives from the same reference tests that define $T$,
-and it marks what a direct computational correctness channel buys.
+control in Section~\ref{sec:empirical}; its zero false acceptances there are by
+construction, since the signal derives from the same reference tests that define $T$.
+It still falsely rejects six of the 155 correct candidates, and it marks what a
+direct computational correctness channel buys.
 
 \paragraph{Numerical invariants and retrieval grounding.} Dimensional analysis,
 conservation laws, and sanity bounds select under physical ground truth; citation and

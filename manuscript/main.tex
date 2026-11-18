@@ -59,7 +59,8 @@ with fixed denominators,
 with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family
 (overall verdict accuracy improves in none: the full-population arm discordance
 is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
-incorrect stratum),
+incorrect stratum; for Qwen a uniform threshold shift is also compatible with the
+data, and discrimination improvement's interval excludes zero only for GPT-6-Luna),
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a separately-ledgered
 contrast exposed to run-batch differences in both magnitude and direction:
@@ -835,8 +836,10 @@ the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% 
 $86$--$97\%$ levels may partly reflect conventions hidden from the evaluator rather
 than evaluator blind spots alone. The failure-type stratification bounds how far a
 convention account can go: $62.8\%$ of incorrect candidates run and fail on values,
-and self-check accepts those at $92.4\%$---behavior no interface convention can
-rescue---with the crash stratum at least as high ($94.4\%$);
+and self-check accepts those at $92.4\%$---behavior a mere interface convention cannot
+rescue, though we cannot exclude that some value failures encode defensible alternative
+readings of the specification the reference asserts instantiate (no arm adjudicated
+defensibility)---with the crash stratum at least as high ($94.4\%$);
 Section~\ref{sec:empirical} reports both.
 
 On the paired incorrect stratum the two arms' joint acceptance is $80.3$--$92.0\%$
@@ -1447,9 +1450,10 @@ assumption that the cross evaluations' batch shift is no larger in magnitude, an
 oppositely signed, than the largest observed run-to-run shift,
 bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
-rates alone predict; the moderation analysis adds small but significant positive
-association beyond the marginals on the paired incorrect stratum (crude $\phi$
-$0.15$--$0.59$, Fisher exact $p<0.03$ in every family), so the marginals carry
+rates alone predict; the moderation analysis adds a small percentage-point excess
+over the marginals on the paired incorrect stratum, accompanied by a modest but
+significant standardized association (crude $\phi$ $0.15$--$0.59$, Fisher exact $p<0.03$
+in every family), so the marginals carry
 most, not all, of the joint rate.
 
 The theory is conditional and concerns average information: under joint conditional

@@ -56,7 +56,10 @@ model families we run self-check and steelman evaluation on
 every stored candidate under a complete-response protocol that preserves
 raw responses before parsing and keeps malformed records visible in the accounting
 with fixed denominators,
-with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family,
+with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family
+(overall verdict accuracy improves in none: the full-population arm discordance
+is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
+incorrect stratum),
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a
 contrast one reversed discordant pair from losing Holm significance), and
@@ -820,7 +823,11 @@ incorrect-stratum sizes all differ, so only the ordering transfers descriptively
 the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
 \emph{every} reference assert (\path{scripts/mbpp_v2_error_severity_audit.py}). The
 $86$--$97\%$ levels may partly reflect conventions hidden from the evaluator rather
-than evaluator blind spots alone.
+than evaluator blind spots alone. The failure-type stratification bounds how far a
+convention account can go: $62.8\%$ of incorrect candidates run and fail on values,
+and self-check accepts those at $92.4\%$---behavior no interface convention can
+rescue---with the crash stratum at least as high ($94.4\%$);
+Section~\ref{sec:empirical} reports both.
 
 On the paired incorrect stratum the two arms' joint acceptance is $80.3$--$92.0\%$
 across families, but the level alone is not evidence of association: both arms accept
@@ -1134,14 +1141,30 @@ The moderator analysis
 has exactly one boundary stratum exposed to this relabeling: its Qwen code-length-high
 stratum reports $68\%$ joint acceptance ($n=22$) under the frozen labels and would
 read $66.7\%$ ($n=21$) under the guard-free reading; every other stratum with at
-least ten paired incorrect candidates is unchanged in its relation to the floor. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
+least ten paired incorrect candidates is unchanged in its relation to the floor,
+and no family's registered conclusion changes under the guard-free reading
+(the code-length moderator fails the registered rule for Qwen under the frozen
+labels already, so that family's persistence is carried by the other four
+moderators). $\kappa$ is measured under that criterion throughout. A deterministic failure-type
 breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
 renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ land in the crash-or-guard-block
 bucket (\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 in that
 bucket, $724$ are genuine runtime crashes and $12$ are pre-execution AST-guard blocks;
 $81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
-\path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). Missing or renamed entry points are therefore negligible, but this
-breakdown does not distinguish genuine wrong answers from defensible alternative
+\path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). False acceptance stratified
+by these categories on the paired incorrect stratum
+(\path{data/mbpp_v2/analysis/failure_type_fa.json},
+\path{scripts/mbpp_v2_failure_type_fa.py}) shows the blind spot is not a crash-specific
+artifact: among the $727$ crash-or-guard-block candidates self-check accepts $94.4\%$
+($686/727$; Wilson 95\% $[92.4,95.8]$) and steelman $89.3\%$ ($[86.8,91.3]$), with the
+self-check-excess discordance significant ($48$ vs $11$ paired discordants, exact
+$p=2.5\times10^{-6}$); among the $1{,}230$ candidates that run and fail on values the
+rates are $92.4\%$ ($1136/1230$; $[90.7,93.7]$) and $89.3\%$ ($[87.5,91.0]$),
+discordance $83$ vs $46$ ($p=2.9\times10^{-3}$); the three missing-entry-point
+candidates are negligible. If anything the level is highest on candidates whose
+visible code fails outright, and the steelman improvement holds within both failure
+types. This breakdown, however, does
+not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control tests that
 question with a joint-visibility intervention, the assert shown to generation and
 evaluation together: across the $947$ tasks attempted, generation accuracy is $56.1\%$ ($531/946$
@@ -1536,6 +1559,11 @@ Model identifiers were \texttt{gpt-5.4} (the API alias resolving to the pinned
 \texttt{deepseek/deepseek-v4.1-flash}, \texttt{z-ai/glm-5.3-flash},
 \texttt{qwen/qwen3.8-flash}, and \texttt{openai/gpt-6-luna}. The HumanEval
 snapshot and reasoning setting are given in Section~\ref{sec:empirical}.
+Four of these five identifiers are unpinned provider router aliases: the model
+behind an alias may be updated by the provider between runs, so the
+repeated-evaluation retests that bound the run-batch component of the same-family
+excess double as the design's control for that drift (provider-side version
+changes are a batch shift in exactly the sense the bound prices).
 
 The MBPP self-check prompt was:
 \begin{quote}\scriptsize\ttfamily\raggedright
@@ -1547,7 +1575,7 @@ You are evaluating one immutable Python candidate solution.
 [CANDIDATE]
 {frozen code}
 
-Analyze whether the candidate satisfies the specification. Do not modify,
+Analyze whether the candidate satisfies the specification and tests. Do not modify,
 repair, rewrite, or provide an alternative solution. End with exactly
 one final line containing only one of:
 VERDICT: ACCEPT
@@ -1594,9 +1622,8 @@ VERDICT: ACCEPT
 VERDICT: REJECT
 \end{quote}
 
-The self-check prompt printed above is the close-variant wording
-(``satisfies the specification''); the production wording said ``specification and
-tests''; the reference
+This is the verbatim production self-check wording (the
+prompt constructed by \path{scripts/mbpp_v2_pilot.py}); the reference
 asserts were nevertheless not shown to the evaluator, so ``tests''
 referred to the hidden ground-truth criterion rather than visible evidence. The
 one-assert-visible control adds one example assert to both generator and

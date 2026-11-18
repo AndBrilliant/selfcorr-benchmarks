@@ -880,24 +880,24 @@ other arm, so it differs from the production paired stratum.
 \centering
 \caption{Repeated evaluation ($k{=}3$ rounds per arm, temperature zero).
 $n$ is the number of candidates with a parsed verdict in all three rounds;
-$e_{3/3}$ is the error rate among candidates accepted in all three rounds
-(with count); $e_{1:2}$ is the error rate among candidates accepted in one
-or two rounds (with count).}
+$e_k$ is the error rate among candidates accepted in the first $k$ calls,
+$k{=}1$ being the production call (counts in parentheses); $e_{1:2}$ is the
+error rate among candidates accepted in one or two rounds (with count).}
 \label{tab:repeated}
-\begin{tabular}{llrrr}
+\begin{tabular}{llrrrrr}
 \hline
-Family & Arm & $n$ & $e_{3/3}$ (\%) & $e_{1:2}$ (\%) \\
+Family & Arm & $n$ & $e_1$ (\%) & $e_2$ (\%) & $e_{3/3}$ (\%) & $e_{1:2}$ (\%) \\
 \hline
-GPT-5.4 & self-check & 947 & 43.4 (874) & 72.4 (29) \\
- & steelman & 936 & 43.6 (808) & 48.1 (79) \\
-DeepSeek-V4.1-Flash & self-check & 910 & 40.3 (865) & 78.0 (41) \\
- & steelman & 900 & 41.0 (847) & 71.1 (45) \\
-GLM-5.3-Flash & self-check & 890 & 27.3 (788) & 65.2 (92) \\
- & steelman & 903 & 26.6 (793) & 67.0 (88) \\
-Qwen-3.8-Flash & self-check & 933 & 42.0 (879) & 80.9 (47) \\
- & steelman & 928 & 41.2 (839) & 67.6 (74) \\
-GPT-6-Luna & self-check & 941 & 44.1 (866) & 68.1 (47) \\
- & steelman & 946 & 43.0 (821) & 67.1 (70) \\
+GPT-5.4 & self-check & 947 & 43.9 (889) & 43.6 (879) & 43.4 (874) & 72.4 (29) \\
+ & steelman & 936 & 43.9 (862) & 43.7 (824) & 43.6 (808) & 48.1 (79) \\
+DeepSeek-V4.1-Flash & self-check & 910 & 41.6 (892) & 40.8 (875) & 40.3 (865) & 78.0 (41) \\
+ & steelman & 900 & 41.5 (873) & 41.2 (855) & 41.0 (847) & 71.1 (45) \\
+GLM-5.3-Flash & self-check & 890 & 30.3 (846) & 28.6 (814) & 27.3 (788) & 65.2 (92) \\
+ & steelman & 903 & 29.6 (849) & 27.4 (808) & 26.6 (793) & 67.0 (88) \\
+Qwen-3.8-Flash & self-check & 933 & 43.1 (908) & 42.4 (890) & 42.0 (879) & 80.9 (47) \\
+ & steelman & 928 & 42.5 (876) & 41.9 (859) & 41.2 (839) & 67.6 (74) \\
+GPT-6-Luna & self-check & 941 & 45.1 (895) & 44.3 (873) & 44.1 (866) & 68.1 (47) \\
+ & steelman & 946 & 44.1 (855) & 43.6 (835) & 43.0 (821) & 67.1 (70) \\
 \hline
 \end{tabular}
 \end{table}
@@ -968,7 +968,8 @@ Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level f
 GPT-6-Luna. The paired control-versus-steelman contrast is significant for exactly one
 family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.026$;
 control using $0.99\times$ the steelman tokens): for Qwen, added deliberation
-without adversarial framing accepts incorrect candidates at the self-check level.
+without adversarial framing accepts incorrect candidates at the self-check level
+(a contrast that also spans the prompt-wording difference, Appendix~\ref{app:prompts}).
 This neutral prompt at near-equal realized token use does not reproduce the steelman reduction,
 associating Qwen's gain with the steelman protocol rather than deliberation alone. That
 association is batch-exposed: the control ledger ran separately from production, and the
@@ -1032,7 +1033,9 @@ with fixed denominators). Two findings follow. First, permissiveness is largely
 general, not self-specific: every evaluator accepts other families' incorrect
 candidates at high rates (cross false acceptance $73$--$94\%$ under self-check and
 $69$--$92\%$ under steelman), so false acceptance of incorrect code does not require
-the code to be one's own. Second, same-family evaluators are more permissive toward their own errors
+the code to be one's own. Second, same-family evaluators are more permissive toward their own errors: a
+contrast collinear with the evaluation run batch, identifying the joint
+family/batch effect rather than family alone
 (the matrix conditions on incorrect candidates, so it measures rejection of
 errors, not discrimination).
 Table~\ref{tab:cross_matrix} gives the full matrix. Candidate-paired discordance runs
@@ -1062,7 +1065,10 @@ incorrect candidates with the same family in separate runs (two retests, both
 arms), and on matched denominators the false-acceptance rate shifts between runs
 by up to $5.1$ percentage points in the largest of the twenty arm-by-retest cells
 (shifts span $+1.2$ to $-5.1$ points; per-cell denominators in the artifact),
-versus a self-check diagonal excess of $9.2$--$11.4$ points. A batch explanation of
+versus a self-check diagonal excess of $9.2$--$11.4$ points, where a family's
+diagonal excess is its own self-check false-acceptance rate on its incorrect
+candidates minus the pooled off-diagonal cross-evaluation rate on the same
+candidates (Table~\ref{tab:cross_matrix}). A batch explanation of
 that excess requires the off-diagonal cross evaluations' false acceptance to sit
 \emph{lower} in the cross batch than it would have in the production batch; assigning
 that downward shift the largest observed run-to-run magnitude, a transportability
@@ -1395,7 +1401,8 @@ agreement measurement is not equivalent to an evaluator accepting a generator's
 incorrect answer, so it does not directly instantiate our high-$\kappa$ condition; it
 motivates checking for coupled evaluation failures. \cite{wataoka2024selfpreference}
 and \cite{li2024llmjudgebias} document self-preference and related LLM-as-a-judge
-biases, consistent with the self-leniency excess measured in our cross-evaluation
+biases, consistent with the diagonal excess measured in our cross-evaluation
+matrix (a joint family/batch contrast)
 matrix.
 
 \paragraph{Verification and external feedback.} \cite{wang2023selfconsistency}
@@ -1464,8 +1471,9 @@ oppositely signed, than the largest observed run-to-run shift,
 bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict; the moderation analysis adds a small percentage-point excess
-over the marginals on the paired incorrect stratum, accompanied by a modest but
-significant standardized association (crude $\phi$ $0.15$--$0.59$, Fisher exact $p<0.03$
+over the marginals on the paired incorrect stratum, accompanied by a standardized
+association that is weak at the bottom of its range but substantial at the top
+(crude $\phi$ $0.15$--$0.59$, Fisher exact $p<0.03$
 in every family), so the marginals carry
 most, not all, of the joint rate.
 
@@ -1694,7 +1702,9 @@ wording itself may anchor acceptance toward ``yes'' (a candidate with no visible
 tests can appear to satisfy them); no arm varied this wording, so its contribution
 to the absolute $\kappa$ levels is unmeasured, and while the paired arm contrasts
 are difference-based and do not inherit the level anchor, the wording difference
-itself is one component of the arm contrast, which we did not isolate. The
+itself is one component of the arm contrast, which we did not isolate; the same
+omission separates the neutral re-examination control from the self-check arm,
+so the control--self-check contrast carries this wording component as well. The
 one-assert-visible control adds one example assert to both generator and
 evaluator. The cross-evaluation arms used the same self-check and steelman
 prompts verbatim for every evaluator--generator pair.

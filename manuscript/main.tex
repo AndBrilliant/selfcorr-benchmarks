@@ -701,7 +701,9 @@ endpoint, not a claim of infinite population evidence.
 A paired bootstrap (4,000-resample inverse-empirical-CDF percentile resampling within
 the nine-error and 155-correct strata, seed 20261104, no
 pseudocounts~\cite{efron1979bootstrap}; 100 of the 4,000 resamples yield infinite
-$\hat E$, so the finite upper endpoint depends on the quantile convention) gives
+$\hat E$, and the exact bootstrap mass at $+\infty$, $\approx\!2.6\%$, exceeds the
+$2.5\%$ level, so the exact upper endpoint is $+\infty$ with $3.26$ a realized
+Monte-Carlo value) gives
 steelman-minus-self-check contrasts of
 $\Delta\hat\kappa=-0.333$ $[-0.889,0.222]$, $\Delta\hat\tau=+0.019$
 $[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,3.26]$: the nominal,
@@ -772,13 +774,18 @@ fewer incorrect candidates. The paired contrast is significant for Qwen ($b/c=26
 exact $p=2.9\times10^{-3}$) and GPT-6-Luna ($b/c=32/3$, exact $p=4.2\times10^{-7}$),
 and both survive Holm adjustment across the five families ($p_{\mathrm{Holm}}=0.0117$
 and $2.1\times10^{-6}$); the other three families show the same direction without
-significance. No overall-verdict McNemar contrast is significant in any family (all
-$p>0.11$), and no arm-by-correctness interaction reaches significance either
+significance. An overall-verdict-accuracy McNemar contrast---a verdict scored correct when it
+matches ground truth, pooled over correct and incorrect paired candidates---is
+significant in no family (discordants where steelman fixes a self-check error versus
+introduces one: GPT-5.4 $39/42$, DeepSeek $24/14$, GLM $37/27$, Qwen $27/19$,
+GPT-6-Luna $36/23$; all $p>0.11$), and no arm-by-correctness interaction reaches
+significance either
 (per-family Fisher homogeneity $p=0.41$--$0.49$), though that test is unpowered for
 establishing the absence of an interaction. The paired discrimination-gap change has a
 95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
 $[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
-discrimination improvement is established for GPT-6-Luna only; these intervals are
+the discrimination
+improvement's interval excludes zero for GPT-6-Luna only; these intervals are
 per-family and unadjusted. True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
 
@@ -902,7 +909,7 @@ deliberation and self-specificity.
 
 \paragraph{Neutral re-examination control.} One neutral, non-adversarial step-by-step
 verification call per frozen candidate---same ledger, same strict verdict grammar, no
-output cap, realized completion tokens recorded---separates adversarial content from
+output cap, realized completion tokens recorded---probes the split between adversarial content and
 added deliberation. Table~\ref{tab:control} shows the result. The control
 false-acceptance rate lies between the two production arms for DeepSeek, GLM, and
 Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level for
@@ -1082,12 +1089,13 @@ bucket, $724$ are genuine runtime crashes and $12$ are pre-execution AST-guard b
 $81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
 \path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). Missing or renamed entry points are therefore negligible, but this
 breakdown does not distinguish genuine wrong answers from defensible alternative
-readings of underspecified prose; the one-assert-visible Qwen control settles that
+readings of underspecified prose; the one-assert-visible Qwen control tests that
 question directly: on all 947 tasks, generation accuracy is $56.1\%$ with one example
 assert shown to both generator and evaluator, versus $55.9\%$ on the same tasks in
 production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
-steelman false acceptance is $92.9\%$ versus $90.6\%$. Hidden conventions therefore
-do not rescue generation or explain the evaluators' acceptance rates
+steelman false acceptance is $92.9\%$ versus $90.6\%$. Making one convention visible
+therefore changes neither generation accuracy nor false acceptance materially, so
+hidden-convention accounts of the acceptance levels find no support in this control
 (\path{data/mbpp_v2/assert_visible_qwen/assert_visible_analysis_summary.txt}).
 
 \paragraph{Token-identical replicas.} The replication arm's two greedy candidates are

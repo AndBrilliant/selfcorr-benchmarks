@@ -1134,7 +1134,9 @@ GPT-6-Luna & 199 & 53 & $4.5\times10^{-21}$ & $[114,175]$ \\
 \centering
 \caption{Full cross-evaluation false-acceptance matrix on incorrect candidates
 (self-check / steelman, percent). Rows are evaluators, columns are generators;
-diagonal cells are same-family evaluations. Denominators are arm-specific per cell
+diagonal cells are same-family evaluations. Pooled same-family odds ratios are
+$2.9$ (self-check) and $1.9$ (steelman), both $p<10^{-22}$
+(\texttt{crossed\_model\_results.json}). Denominators are arm-specific per cell
 and are archived in \texttt{crossed\_model\_results.json}.}
 \label{tab:cross_matrix}
 \resizebox{\columnwidth}{!}{%

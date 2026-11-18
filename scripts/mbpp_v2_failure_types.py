@@ -9,9 +9,10 @@ generation harness:
                                  reference asserts call
   runs, wrong values (assertion failure)  - executed; failed on assertion values
   runtime crash or pre-execution guard block  - anything else (traceback, blocked
-                                  AST guard, syntax error); of the 736 in this bucket
-                                  724 are genuine runtime crashes and 12 are blocked
-                                  before execution by the AST guard
+                                  AST guard, syntax error); the generated
+                                  crash_or_guard_block_split reports how many of
+                                  the bucket are genuine runtime crashes versus
+                                  pre-execution guard blocks
 
 Crash records are further grouped by exception class parsed from the recorded
 traceback. Deterministic; reads ledgers only, no code execution, no network.
@@ -132,7 +133,7 @@ def main() -> int:
 
     print(f"incorrect candidates: {len(incorrect)}")
     print(json.dumps({cat: breakdown[cat] for cat in CATEGORIES}))
-    print("crashes:", crash_total, "|", dict(exception_counts))
+    print("crash_or_guard_block:", crash_total, "|", dict(exception_counts))
     return 0
 
 

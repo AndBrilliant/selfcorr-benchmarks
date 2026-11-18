@@ -45,12 +45,11 @@ coupled verdicts as independent. A HumanEval pilot on one GPT-5.4 candidate per 
 candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
 control running the reference tests rejects all $9$. On 947 MBPP tasks across five
 model families --- 5$\times$947 = 4,735 nominal candidate pairs, of which 4,718
-were actually stored (947+938+942+944+947); the 17-pair gap is one-directional and
-is not a hidden retraction: it is the zero-stored cells (9 for
-ds-v4-flash, 5 for glm-5.3-flash, 3 for qwen38-flash; the two GPT families
-store the full 947 each) --- we run self-check and steelman evaluation on
+were actually stored; the 17-pair gap is one-directional zero-stored cells, not a
+hidden retraction --- we run self-check and steelman evaluation on
 every stored candidate under a complete-response protocol that preserves
-raw responses before parsing and keeps malformed records in the denominators,
+raw responses before parsing and keeps malformed records visible in the accounting
+with fixed denominators,
 with a neutral re-examination prompt at matched token use as control. Steelman lowers false acceptance in every family,
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction, and
@@ -941,7 +940,9 @@ with fixed denominators). Two findings follow. First, permissiveness is largely
 general, not self-specific: every evaluator accepts other families' incorrect
 candidates at high rates (cross false acceptance $73$--$94\%$ under self-check and
 $69$--$92\%$ under steelman), so false acceptance of incorrect code does not require
-the code to be one's own. Second, same-family evaluators are more permissive toward their own errors.
+the code to be one's own. Second, same-family evaluators are more permissive toward their own errors
+(the matrix conditions on incorrect candidates, so it measures rejection of
+errors, not discrimination).
 Table~\ref{tab:cross_matrix} gives the full matrix. Candidate-paired discordance runs
 $2.5$--$7.4$ to one toward external evaluators rejecting errors that the generating
 family accepted, versus the reverse, and every task-clustered

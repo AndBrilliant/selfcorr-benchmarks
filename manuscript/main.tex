@@ -1,4 +1,4 @@
-\documentclass[journal]{IAENGtran}
+\documentclass[a4paper,journal]{IAENGtran}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -36,7 +36,10 @@
 \begin{abstract}
 We derive, from first principles and standard information-theoretic constructs, when
 an evaluator's judgment can add almost nothing to what is already known about
-correctness: under an explicit shared-blind-spot assumption,
+correctness: with $T$ the correctness indicator, $S$ the evaluator's verdict, $G$
+the candidate and its visible context, and $Z$ a latent variable shared between
+generator and evaluator, the shared-blind-spot assumption
+$S\perp T\mid(G,Z)$ gives
 $I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator contributes at most the
 information a shared latent failure variable mediates, a cap that is restrictive
 exactly when the shared variable carries little information about correctness.
@@ -81,6 +84,11 @@ crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
 Repeated unanimous acceptance on MBPP leaves $26.6$--$44.1\%$ residual
 error under the benchmark's hidden reference-assert criterion, and accepted candidates remain only $55$--$70\%$ correct under the same criterion.
 \end{abstract}
+
+\begin{IAENGkeywords}
+Large language models, self-evaluation, self-correction, false acceptance, evaluator
+calibration, mutual information, benchmark methodology.
+\end{IAENGkeywords}
 
 \begin{IAENGkeywords}
 LLM, self-correction, self-evaluation, information theory, error correlation, external selection, benchmark evaluation.

@@ -54,7 +54,7 @@ whose code references `compile()`, `getattr()`, or `import sys` are labeled
 incorrect without being run. Six of the 1,987 labeled-incorrect candidates
 (0.3%) pass every reference assert when executed outside the guard; the frozen
 labels stand. Under the guard-free reading no pooled or per-family
-incorrect-candidate rate shifts by more than 0.5 percentage points (the
+incorrect-candidate rate shifts by more than 0.6 percentage points (the
 within-crash TypeError share, a ratio of two moved counts, by at most 0.7); the
 moderator analysis has exactly one boundary stratum exposed (Qwen code-length-high,
 68% at n=22 frozen, would read 66.7% at n=21 guard-free), with every other
@@ -71,7 +71,8 @@ qualifying stratum unchanged relative to the floor.
 - `data/MBPP.jsonl`, `data/MBPP.corpus-provenance.json` — task corpus and provenance
 - `data/humaneval/` — HumanEval stratum (data, responses, reproduction guide)
 
-Ledger directories carry `manifest.sha256` over their raw files.
+Ledger directories carry `manifest.sha256` over their raw files
+(HumanEval's is `MANIFEST.sha256`).
 
 Reproducibility note: after an internal consistency audit, 35 cross-evaluation
 cells were re-evaluated on the corrected candidates; all raw events, including

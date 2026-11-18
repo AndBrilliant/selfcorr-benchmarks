@@ -122,7 +122,7 @@ verdict is worth.
     approaches.
     \item \textbf{An auditable protocol and design principles.} Every response is
     preserved before parsing, no output cap is imposed, malformed responses remain
-    visible with fixed denominators, and all artifacts carry SHA-256 manifests in a
+    visible with fixed denominators, and all data artifacts carry SHA-256 manifests in a
     public repository. The design principles for external selection are offered as
     engineering heuristics motivated by the analysis, not as theorem-derived guarantees.
 \end{enumerate}
@@ -773,8 +773,8 @@ $55.0\%\rightarrow56.0\%$, GPT-5.4 flat at $56.3\%\rightarrow56.2\%$). A statist
 detectable reduction in false acceptance therefore does not translate into a large
 improvement in the reliability of accepted solutions: better internal critique is not
 reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
-accepted candidates are only $0.4$--$1.9$ points more likely to be correct than the
-family's base generation accuracy. Absolute rates differ from the HumanEval measurement (86--97\%
+accepted candidates are only $0.8$--$3.2$ points more likely to be correct than the
+family's base generation accuracy (correct$/$all 947 tasks). Absolute rates differ from the HumanEval measurement (86--97\%
 versus 33--67\% false acceptance); benchmarks, candidate-generating models, and
 incorrect-stratum sizes all differ, so only the ordering transfers descriptively, not
 the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
@@ -866,7 +866,7 @@ before any stratified statistic was computed
 (the specification file \path{scripts/mbpp_v2_moderator_spec.md} in the pinned
 repository commit is byte-identical to the registered version). Under the registered
 rule the association is persistent in all
-five families: the stratified $\phi$ is within $0.01$--$0.03$ of the crude value for
+five families: the stratified $\phi$ is within $0.03$ of the crude value for
 every moderator (crude range $0.15$--$0.59$), and joint acceptance stays at or above
 $68\%$ in every stratum with at least ten paired incorrect candidates
 (smallest qualifying stratum $n=13$ at $77\%$; the lone exception is a
@@ -960,9 +960,9 @@ measures model-family effects, not provider independence; adding a same-provider
 indicator preserves the same-family effect (self-check odds ratio $2.06$,
 $p=3.5\times10^{-10}$; steelman odds ratio $1.49$, $p=3.3\times10^{-6}$).
 Cross rates also track error blatancy: the incorrect candidates of the highest-accuracy
-generator (GLM, whose error stratum is smallest at $n_{T=0}=289$) are rejected more by
+generator (GLM, whose error stratum is smallest at $n_{T=0}=299$) are rejected more by
 every evaluator than that evaluator's average over the other families (GLM self-check
-cross false acceptance $72.7$--$78.8\%$). The blind spot is therefore mostly an
+cross false acceptance $73.2$--$82.5\%$). The blind spot is therefore mostly an
 evaluator property with a measurable same-family excess on top.
 
 \begin{table}[!t]
@@ -1050,7 +1050,7 @@ stage. Executed outside the guard, each passes every reference assert for its
 task. Ground truth is defined by the operational harness, so the frozen labels
 stand; but because the guard-free reading would move these six to the correct
 pool, no pooled or per-family incorrect-candidate rate in this paper shifts by
-more than $0.5$ percentage points under either labeling (the within-crash
+more than $0.6$ percentage points under either labeling (the within-crash
 TypeError share, a ratio of two moved counts, shifts by at most $0.7$ points).
 The moderator analysis
 has exactly one boundary stratum exposed to this relabeling: its Qwen code-length-high
@@ -1315,7 +1315,7 @@ infrastructure buildout and design. This research received no external funding. 
 empirical measurements used the public HumanEval and MBPP benchmarks. The preserved
 benchmark harness, ledgers, and audit artifacts are publicly available at
 \texttt{https://github.com/\allowbreak AndBrilliant/\allowbreak selfcorr-benchmarks}
-(ledgers frozen since commit \texttt{81537cf}; audited release at current \texttt{main}). The author declares no conflicts of interest.
+(ledgers frozen since commit \texttt{81537cf}; audited release tagged \texttt{v1.0-audited}). The author declares no conflicts of interest.
 
 Use of AI tools: AI-assisted tools were used during manuscript preparation for language
 editing and drafting support. All ideas, methodology, theorems, and technical content

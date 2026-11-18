@@ -38,7 +38,9 @@ We derive, from first principles and standard information-theoretic constructs, 
 an evaluator's judgment can add almost nothing to what is already known about
 correctness: under an explicit shared-blind-spot assumption,
 $I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator contributes at most the
-information a shared latent failure variable mediates, and an observer who treats
+information a shared latent failure variable mediates, a cap that is restrictive
+exactly when the shared variable carries little information about correctness, and
+an observer who treats
 coupled verdicts as independent can become arbitrarily confident in errors. These
 are conditional results: they define a failure regime and its measurable
 signatures, not an inevitability. The question they motivate is empirical: do
@@ -50,9 +52,7 @@ discrimination gap $\Delta=\tau-\kappa$. A HumanEval pilot on one GPT-5.4 candid
 (155 correct, 9 incorrect) calibrates the setup: self-check accepts $6/9$ incorrect
 candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
 control running the reference tests rejects all $9$. On 947 MBPP tasks across five
-model families --- 5$\times$947 = 4,735 nominal candidate pairs, of which 4,718
-were actually stored; the 17-pair gap is one-directional zero-stored cells, not a
-hidden retraction --- we run self-check and steelman evaluation on
+model families we run self-check and steelman evaluation on
 every stored candidate under a complete-response protocol that preserves
 raw responses before parsing and keeps malformed records visible in the accounting
 with fixed denominators,
@@ -66,9 +66,8 @@ effect survives a same-provider control. A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
 crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
-Consistent with the amplification proposition,
-repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual error, and on
-MBPP accepted candidates remain only $55$--$70\%$ correct.
+Repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual
+error, and accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
 
 \begin{IAENGkeywords}
@@ -101,11 +100,10 @@ asked to do---not simply how much computation it spends---determines what an acc
 verdict is worth.
 
 The research logic runs from formalization to measurement. We begin from standard
-results in information theory and probability: chain rule and data processing,
-nothing exotic. The question is what they imply for an evaluator that shares the
+results in information theory and probability: chain rule and data processing. The question is what they imply for an evaluator that shares the
 generator's failure modes. The implications are conditional: they describe when an
 evaluation verdict carries little information and when repeated agreement misleads,
-not whether any given model sits in that regime. We then operationalize the regime
+not whether any given model sits in that regime. We then operationalize its observable consequences
 through directly measurable rates: acceptance of incorrect candidates,
 discrimination gaps, residual error under repeated verdicts. The derivation precedes
 the experiments; the experiments do not verify the derivation, they measure whether

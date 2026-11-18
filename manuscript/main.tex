@@ -610,8 +610,9 @@ and execution. The three evaluator conditions are: \textbf{self-check} (the same
 judges its frozen candidate in a fresh context with a binary verdict),
 \textbf{steelman} (the same model produces the strongest case against and for the
 candidate before a final verdict), and an \textbf{execution-grounded positive control}
-(the evaluator receives only a binary PASS/FAIL signal from the reference-test
-mechanism that defines $T$---an oracle-grounded control, not an independent validation
+(the evaluator sees the frozen candidate and receives only a binary PASS/FAIL signal
+from the reference-test mechanism that defines $T$, issuing its own verdict rather
+than copying the signal---an oracle-grounded control, not an independent validation
 benchmark).
 
 The MBPP runs use a complete-response protocol: every API attempt is appended verbatim,
@@ -706,8 +707,8 @@ $2.5\%$ level, so the exact upper endpoint is $+\infty$ with $3.26$ a realized
 Monte-Carlo value) gives
 steelman-minus-self-check contrasts of
 $\Delta\hat\kappa=-0.333$ $[-0.889,0.222]$, $\Delta\hat\tau=+0.019$
-$[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,3.26]$: the nominal,
-unadjusted interval includes no evidence gain, so the nine-error stratum cannot support
+$[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,+\infty)$, with $3.26$ the realized
+Monte-Carlo upper value: the nominal, unadjusted interval includes no evidence gain, so the nine-error stratum cannot support
 a precise between-arm evidence estimate. HumanEval is therefore a clean paired
 demonstration of the diagnostic ordering, not a powered effect estimate;
 Section~\ref{sec:mbpp} supplies the powered counterpart.
@@ -781,7 +782,9 @@ introduces one: GPT-5.4 $39/42$, DeepSeek $24/14$, GLM $37/27$, Qwen $27/19$,
 GPT-6-Luna $36/23$; all $p>0.11$), and no arm-by-correctness interaction reaches
 significance either
 (per-family Fisher homogeneity $p=0.41$--$0.49$), though that test is unpowered for
-establishing the absence of an interaction. The paired discrimination-gap change has a
+establishing the absence of an interaction (the homogeneity test and the discrimination
+intervals below estimate different quantities: equality of the arm effect across
+correctness strata versus the combined $\tau-\kappa$ contrast). The paired discrimination-gap change has a
 95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
 $[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
 the discrimination
@@ -919,7 +922,11 @@ family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.
 control using $0.99\times$ the steelman tokens): for Qwen, matched deliberation
 without adversarial framing accepts incorrect candidates at the self-check level:
 this neutral prompt at matched token use does not reproduce the steelman reduction,
-localizing Qwen's gain to the steelman protocol rather than deliberation alone. GPT-5.4
+localizing Qwen's gain to the steelman protocol rather than deliberation alone. The
+contrast is fragile: one additional opposing discordant pair ($22/8$) would raise the
+Holm-adjusted $p$ to $0.081$, and extreme imputation of the three incorrect candidates
+missing a control verdict bounds the Holm-adjusted $p$ to $0.007$--$0.175$, so we
+treat this as the control's sensitivity-flagged result rather than a robust effect. GPT-5.4
 shows the same direction with the computation imbalance reversed---control uses
 $1.44\times$ the steelman tokens yet accepts $90.6\%$ of incorrect candidates versus
 $88.5\%$ under steelman---but the paired contrast is not significant there ($p=0.14$). For GPT-6-Luna, control and
@@ -927,7 +934,7 @@ steelman accept incorrect candidates at essentially the same rate ($85.8\%$ vers
 $86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
 re-engagement; that near-equality is not an equivalence result, and a modest
 adversarial-content contribution cannot be excluded. Across families the control
-falsifies the simplest ``more tokens did it'' account: equal or greater deliberation
+falsifies the simplest pooled-level ``more tokens did it'' account: equal or greater deliberation
 reproduces the self-check blind spot in the family with the clearest steelman gain. The
 control has measured computation, not fully matched computation (token ratios
 $0.65$--$1.44$), and even equal average token use does not establish identical
@@ -976,7 +983,12 @@ acceptance of incorrect candidates remains elevated under self-check
 ($\beta=1.078$, odds ratio $2.94$, $p=1.2\times10^{-36}$) and steelman
 ($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Under self-check every
 evaluator remains significant after Holm adjustment; under steelman all five do
-(Qwen weakest, Holm-adjusted $p=0.025$). Prompts and decoding
+(Qwen weakest, Holm-adjusted $p=0.025$). One design limit is structural: the diagonal
+(same-family) cells come from the production ledger (run 2026-11-05) and the
+off-diagonal cells from the cross-evaluation ledger (run 2026-11-06/07), so the
+same-family indicator is collinear with a production-versus-cross batch factor and the
+two cannot be separated in this design; timestamps per record are preserved in both
+ledgers. Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
 difference is not a framing artifact; self-preference through familiarity with one's
 own phrasing remains a candidate mechanism for the excess. A second is
@@ -1097,7 +1109,8 @@ assert shown to both generator and evaluator, versus $55.9\%$ on the same tasks 
 production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
 steelman false acceptance is $92.9\%$ versus $90.6\%$. Making one convention visible
 therefore changes neither generation accuracy nor false acceptance materially, so
-hidden-convention accounts of the acceptance levels find no support in this control
+hidden-convention accounts of the acceptance levels find no support in this control;
+an evaluator-only visibility arm on the frozen production candidates was not run
 (\path{data/mbpp_v2/assert_visible_qwen/assert_visible_analysis_summary.txt}).
 
 \paragraph{Token-identical replicas.} The replication arm's two greedy candidates are
@@ -1520,7 +1533,9 @@ VERDICT: ACCEPT
 VERDICT: REJECT
 \end{quote}
 
-The production self-check wording said ``specification and tests''; the reference
+The self-check prompt printed above is the close-variant wording
+(``satisfies the specification''); the production wording said ``specification and
+tests''; the reference
 asserts were nevertheless not shown to the evaluator, so ``tests''
 referred to the hidden ground-truth criterion rather than visible evidence. The
 one-assert-visible control adds one example assert to both generator and

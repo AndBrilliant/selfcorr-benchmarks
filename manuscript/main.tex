@@ -53,8 +53,9 @@ $0.5$--$2.8$ points more likely to be correct than the unfiltered pool, and
 three unanimous acceptances still leave $26.6$--$44.1\%$ residual error.
 Structured steelman evaluation in a clean context lowers false acceptance in
 every family by $1.7$--$6.7$ points (Holm-significant for Qwen and
-GPT-6-Luna) at a true-acceptance cost of at most $3.2$ points: a favorable
-trade whenever a false acceptance costs more than one regeneration.
+GPT-6-Luna) at a true-acceptance cost of at most $3.2$ points; the break-even is
+roughly $1.6$--$2.4$ regenerations per avoided false acceptance, a small integer
+against the cost of a shipped defect.
 Cross-evaluation shows permissiveness is largely evaluator-general, with a
 same-family excess whose batch share is bounded by repeated-evaluation
 retests. A severity audit of 1,987 incorrect candidates finds $84.4\%$ fail
@@ -142,8 +143,7 @@ proved by standard chain-rule and data-processing arguments; the contribution is
 the formulation — identifying self-evaluation failure with latent-variable
 mediation and deriving its measurable signatures — not new proof machinery. That
 is deliberate: a framework built from standard tools can be checked step by step
-without a bespoke formalism, and its force comes from what it predicts about
-observable rates. The central negative results assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
+without a bespoke formalism. The central negative results assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
 is so corrupted by shared blind spots that the input itself supplies no residual
 correctness signal. Selectors whose verdicts actually draw on an independent ground-truth
 channel (a proof checker,
@@ -273,14 +273,13 @@ informative, but positive association alone does not imply negligible evidence: 
 evidence bound is determined by measurable acceptance rates, whereas the ceiling
 additionally requires the latent-variable assumptions.
 
-A conditional theory is not tested by exhibiting its latent variable; it is tested
-by whether the observable signatures it predicts appear in the data. The signatures
-here are rates, not constructs: acceptance of incorrect candidates, discrimination
-gaps, and the evidence carried by repeated agreement. Sections~\ref{sec:empirical}
-and~\ref{sec:mechanism} measure exactly these. The inferential shape is standard in
-measurement science: Bell-type inequalities are conditional on unobserved
-variables and are tested through observable correlations; here, the conditional
-independence is the scope condition and the acceptance rates are the test.
+The theory's role is to motivate and organize the measurements: it identifies
+which observable rates matter and what pattern to expect when the regime holds.
+The experiments estimate those rates; they do not test the
+conditional-independence assumption or identify $Z$ — the signatures are
+compatible with shared blind spots, general permissiveness, and task difficulty
+alike, and Sections~\ref{sec:empirical} and~\ref{sec:mechanism} report them as
+measurements, not as verification of the mechanism.
 
 \subsection{Information-Theoretic Scaffolding: Bounding What $Z$ Mediates}
 
@@ -821,12 +820,17 @@ incorrect-stratum contrasts is the only family-wise-adjusted inference, and the
 headline paired conclusions rest on that set (secondary conclusions are labeled
 descriptive or carry the per-set adjustments named above). True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
-The value of the trade depends on the cost model. If a false acceptance is more
-expensive than one regeneration of a rejected candidate — the usual case in code
-pipelines, where a shipped defect costs more than an API call — the steelman
-trade is favorable in every family, because a rejected candidate is not discarded
-but sent around the loop again; the largest observed true-acceptance cost is
-3.2 points.
+The value of the trade depends on the cost model. If a rejection triggers one
+regeneration and a false acceptance costs $c$ times a regeneration, the steelman
+trade breaks even at
+$c^{*}=1+\pi\,\Delta\tau\big/[(1-\pi)\,\Delta\kappa]$,
+with $\pi$ the correct fraction among paired candidates and $\Delta\kappa$,
+$\Delta\tau$ the paired drops in false and true acceptance. The table's rounded
+rates put $c^{*}$ between $1.0$ (DeepSeek, GLM, where $\Delta\tau=0$) and $2.4$
+(GPT-5.4), at roughly $1.6$ for Qwen and GPT-6-Luna. The break-even is therefore
+a small integer, not one: my earlier framing understates the cost side. It
+remains favorable in any deployment where a shipped defect costs more than about
+two regeneration calls, which is the usual case.
 
 The practical reliability of accepted candidates moves correspondingly little: among
 candidates an arm accepts, the fraction correct is $55$--$70\%$ and improves by at most

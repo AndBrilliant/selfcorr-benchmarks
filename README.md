@@ -41,7 +41,11 @@ copy of the repo if you want to compare against the shipped outputs.
 
 ## Manuscript
 
-`manuscript/main.tex` is the LaTeX source of the paper these data support (compiled with `IAENGtran.cls`/`BibTeXtran.bst`; `refs.bib` alongside). Every number quoted in the manuscript is derivable from this repository's ledgers via the scripts above.
+The manuscript no longer lives in this repository. Canonical source is the
+Overleaf project (IJCS submission), cloned locally at `~/ijcs-manuscript`
+(project 6962fbdb). It was removed from this repo after the final sync at
+`8e18ae8` (see Overleaf commit 41b7080). Every number quoted in the manuscript
+is still derivable from this repository's ledgers via the scripts above.
 
 ## Data layout
 

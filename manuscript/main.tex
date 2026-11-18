@@ -641,7 +641,14 @@ final attempts carry no \texttt{max\_tokens}-style parameter, and no response en
 any denominator is truncated at our behest; a pair whose final attempt reaches the provider's own output ceiling is
 never regenerated and stays visible as a malformed record with a fixed denominator;
 verdict extraction accepts only a strict terminal \texttt{VERDICT: ACCEPT} or
-\texttt{VERDICT: REJECT} marker with no substring fallback. Across the five ledgers
+\texttt{VERDICT: REJECT} marker with no substring fallback. Within the production
+ledger the two primary arms are candidate-matched in time: each frozen candidate's
+self-check and steelman calls were issued back to back (median lag $0$s, 90th
+percentile $8$s), and the two event streams cover the same $03$:$03$--$12$:$01$
+window on 2026-11-05 with $76\%$ of consecutive events alternating arms, so the
+primary contrast is batch-matched by construction; the separately-ledgered
+control and cross-evaluation runs, which came later, are the batch-exposed
+contrasts priced in Section~\ref{sec:empirical}. Across the five ledgers
 (production, repeated evaluation, replication, neutral control, cross-evaluation),
 93,261 API events are preserved, and every parsed verdict reproduces from preserved raw
 text. All generations and evaluations ran at temperature 0; GPT-5.4 used the same
@@ -868,8 +875,8 @@ $26.6$--$44.1\%$ error, versus $48$--$81\%$ for candidates accepted in only one 
 rounds; that comparison mixes first-call rejections back in, so we also condition on
 the first call: among candidates the production call already accepted, error falls
 monotonically from $29.6$--$45.1\%$ at one acceptance to $26.6$--$44.1\%$ at three
-unanimous acceptances in every arm--family cell, a further $0.3$--$3.0$ points of
-discrimination across the two extra calls (Table~\ref{tab:repeated}).
+unanimous acceptances in every arm--family cell, a further $0.3$--$3.0$ percentage-point
+reduction in residual error across the two extra calls (Table~\ref{tab:repeated}).
 Repeated confident acceptance therefore does add evidence about correctness on a
 fixed candidate even within the already-accepted pool, but the residual error of unanimous
 acceptance stays at $26.6$--$44.1\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances

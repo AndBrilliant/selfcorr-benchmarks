@@ -79,7 +79,7 @@ candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
 crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
 Repeated unanimous acceptance on MBPP leaves $26.6$--$44.1\%$ residual
-error, and accepted candidates remain only $55$--$70\%$ correct.
+error under the benchmark's hidden reference-assert criterion, and accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
 
 \begin{IAENGkeywords}
@@ -861,8 +861,13 @@ from a controlled sampling model. Verdicts are highly
 stable: $89.7$--$96.9\%$ of candidates receive a unanimous verdict across three rounds,
 and agreement itself is informative: candidates accepted in all three rounds carry
 $26.6$--$44.1\%$ error, versus $48$--$81\%$ for candidates accepted in only one or two
-rounds (Table~\ref{tab:repeated}). Repeated confident acceptance therefore does add
-evidence about correctness on a fixed candidate, but the residual error of unanimous
+rounds; that comparison mixes first-call rejections back in, so we also condition on
+the first call: among candidates the production call already accepted, error falls
+monotonically from $29.6$--$45.1\%$ at one acceptance to $26.6$--$44.1\%$ at three
+unanimous acceptances in every arm--family cell, a further $0.3$--$3.0$ points of
+discrimination across the two extra calls (Table~\ref{tab:repeated}).
+Repeated confident acceptance therefore does add evidence about correctness on a
+fixed candidate even within the already-accepted pool, but the residual error of unanimous
 acceptance stays at $26.6$--$44.1\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances
 move the error rate from $45.7\%$ at baseline to $43.4\%$. This is an empirical stability property,
 not a measured information-theoretic ceiling: the latent bound is not identified, and
@@ -940,8 +945,9 @@ least ten paired incorrect candidates
 one-observation stratum at $0\%$). Here $\phi$ is the self-check--steelman verdict association
 on the incorrect stratum, not a ground-truth effect. One moderator partially attenuates it: in the text-processing
 stratum $\phi$ drops to $0.07$--$0.30$ versus $0.42$--$0.46$ in the remaining
-candidates for three families. This rules out the five registered covariates, one at a
-time, as explanations of the association, not every candidate-difficulty account, and
+candidates for three families. This argues against the five registered covariates, taken one at a time, as
+explanations of the association (coarse stratification cannot exclude confounding
+within bins), not against every candidate-difficulty account, and
 it is associational rather than a conditional-independence test.
 
 \subsection{Mechanism: Adversarial Content and Self-Leniency}
@@ -1686,8 +1692,9 @@ asserts were nevertheless not shown to the evaluator, so ``tests''
 referred to the hidden ground-truth criterion rather than visible evidence. The
 wording itself may anchor acceptance toward ``yes'' (a candidate with no visible
 tests can appear to satisfy them); no arm varied this wording, so its contribution
-to the absolute $\kappa$ levels is unmeasured, though the paired arm contrasts are
-difference-based and less exposed. The
+to the absolute $\kappa$ levels is unmeasured, and while the paired arm contrasts
+are difference-based and do not inherit the level anchor, the wording difference
+itself is one component of the arm contrast, which we did not isolate. The
 one-assert-visible control adds one example assert to both generator and
 evaluator. The cross-evaluation arms used the same self-check and steelman
 prompts verbatim for every evaluator--generator pair.

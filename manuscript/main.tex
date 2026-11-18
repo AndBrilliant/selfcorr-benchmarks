@@ -57,7 +57,7 @@ every stored candidate under a complete-response protocol that preserves
 raw responses before parsing and keeps malformed records visible in the accounting
 with fixed denominators,
 with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family
-(overall verdict accuracy improves in none: the full-population arm discordance
+(overall verdict accuracy shows no significant improvement in any family: the full-population arm discordance
 is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
 incorrect stratum; for Qwen a uniform threshold shift is also compatible with the
 data, and discrimination improvement's interval excludes zero only for GPT-6-Luna),
@@ -815,8 +815,9 @@ secondary analyses: the bootstrap discrimination intervals are per-family and
 unadjusted, the control contrasts are Holm-adjusted only within their own
 five-family set, and the moderator, failure-type, and cross-evaluation tests carry
 per-set or no correction; the primary five-family Holm adjustment on the paired
-incorrect-stratum contrasts is the only family-wise-adjusted inference, and every
-conclusion in this paper rests on that set. True-acceptance cost is small and family-dependent: at most
+incorrect-stratum contrasts is the only family-wise-adjusted inference, and the
+headline paired conclusions rest on that set (secondary conclusions are labeled
+descriptive or carry the per-set adjustments named above). True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
 
 The practical reliability of accepted candidates moves correspondingly little: among
@@ -953,7 +954,9 @@ deliberation and self-specificity.
 \paragraph{Neutral re-examination control.} One neutral, non-adversarial step-by-step
 verification call per frozen candidate---same ledger, same strict verdict grammar, no
 output cap, realized completion tokens recorded---probes the split between adversarial content and
-added deliberation. Table~\ref{tab:control} shows the result. The control
+added deliberation, as bundled protocols rather than isolated factors (the steelman
+arm couples a critic persona and two-sided enumeration with adversarial content, and
+the control couples neutral framing with re-engagement). Table~\ref{tab:control} shows the result. The control
 false-acceptance rate lies between the two production arms for DeepSeek, GLM, and
 Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level for
 GPT-6-Luna. The paired control-versus-steelman contrast is significant for exactly one
@@ -985,7 +988,8 @@ steelman accept incorrect candidates at essentially the same rate ($85.8\%$ vers
 $86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
 re-engagement; that near-equality is not an equivalence result, and a modest
 adversarial-content contribution cannot be excluded. Across families the control
-undercuts the simplest pooled-level ``more tokens did it'' account: in Qwen,
+counts against the simplest pooled-level ``more tokens did it'' account, subject to
+the same cross-ledger batch caveat: in Qwen,
 near-equal realized deliberation without the
 steelman protocol reproduces the self-check blind spot. The
 control has measured computation, not fully matched computation (token ratios
@@ -1036,9 +1040,9 @@ from different run batches, so the contrast aggregates batch with family effects
 same-family
 acceptance of incorrect candidates remains elevated under self-check
 ($\beta=1.078$, odds ratio $2.94$, $p=1.2\times10^{-36}$) and steelman
-($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Under self-check every
-evaluator remains significant after Holm adjustment; under steelman all five do
-(Qwen weakest, Holm-adjusted $p=0.025$). One design limit is structural: the diagonal
+($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Every
+evaluator remains significant after Holm adjustment under both arms (Qwen weakest on
+steelman, Holm-adjusted $p=0.025$). One design limit is structural: the diagonal
 (same-family) cells come from the production ledger (run 2026-11-05) and the
 off-diagonal cells from the cross-evaluation ledger (runs 2026-11-06/07, with one
 later batch of $140$ records on 2026-11-16: $60$ GLM-, $60$ Qwen-, and $20$
@@ -1073,7 +1077,8 @@ rather than recognizing authorship. Two families share a provider, so the matrix
 measures model-family effects, not provider independence; adding a same-provider
 indicator preserves the same-family contrast (self-check odds ratio $2.06$,
 $p=3.5\times10^{-10}$; steelman odds ratio $1.49$, $p=3.3\times10^{-6}$).
-Cross rates also track error severity: the incorrect candidates of the highest-accuracy
+Cross rates are also consistent with an error-severity account---severity not measured
+independently here---as the incorrect candidates of the highest-accuracy
 generator (GLM, whose error stratum numbers $308$ incorrect candidates, $304$
 with a parsed self-check verdict and $299$ fully paired)
 are rejected more by
@@ -1160,9 +1165,12 @@ build (of the canonical 974; the 27 excluded task ids and their provenance are a
 in \path{data/MBPP.corpus-provenance.json}), and reference-assert counts per kept task are three in 936 of
 the 947 tasks, with the remaining eleven carrying four to six (per-task reference
 asserts are archived in \path{data/MBPP.jsonl}). The full-population severity audit shows 84.4\% of incorrect
-candidates fail \emph{every} reference assert: the dominant pattern is wholesale
-behavioral failure under the benchmark's own criterion, not a near-miss on one
-ambiguous test. Six of the 1,987 (0.3\%) warrant an explicit reconciliation note:
+candidates fail \emph{every} reference assert. That figure counts both genuine wrong
+answers and interface-level mismatches (81.5\% of the crash bucket are
+\texttt{TypeError}s, which also fail every assert), so we report it as
+failure under the benchmark's own criterion rather than as evidence of wholesale
+behavioral wrongness; it does rule out ``near-miss on one ambiguous test'' as the
+dominant pattern. Six of the 1,987 (0.3\%) warrant an explicit reconciliation note:
 the production harness applies a conservative static guard that rejects, before
 execution, any candidate whose code references \texttt{compile()},
 \texttt{getattr()}, or \texttt{import sys}, and these six were blocked at that
@@ -1442,8 +1450,7 @@ not batch confounding) at near-equal realized token use
 ($0.99\times$), while GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
-acceptance excess in every evaluator under self-check and in all five under
-steelman---an excess collinear with a production-versus-cross run-batch difference, so
+acceptance excess in every evaluator under both arms---an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design
 (though repeated-evaluation retests of the same frozen candidates, under the
 assumption that the cross evaluations' batch shift is no larger in magnitude, and not

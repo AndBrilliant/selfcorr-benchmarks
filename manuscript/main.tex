@@ -803,7 +803,9 @@ significant in no family (discordants where steelman fixes a self-check error ve
 introduces one: GPT-5.4 $39/42$, DeepSeek $24/14$, GLM $37/27$, Qwen $27/19$,
 GPT-6-Luna $36/23$; all $p>0.11$), and no arm-by-correctness interaction reaches
 significance either
-(Woolf homogeneity of odds ratios, $p=0.34$--$0.76$,
+(Woolf homogeneity of odds ratios on the marginal stratum tables: arm verdicts
+within a stratum are candidate-paired and are treated as independent, so the test
+is descriptive; $p=0.34$--$0.76$,
 \path{data/mbpp_v2/analysis/homogeneity_check.json}; on the additive scale the
 interaction is the discrimination-gap change, whose GPT-6-Luna interval below excludes zero),
 though that test is unpowered for
@@ -1409,8 +1411,7 @@ incorrect answer, so it does not directly instantiate our high-$\kappa$ conditio
 motivates checking for coupled evaluation failures. \cite{wataoka2024selfpreference}
 and \cite{li2024llmjudgebias} document self-preference and related LLM-as-a-judge
 biases, consistent with the diagonal excess measured in our cross-evaluation
-matrix (a joint family/batch contrast)
-matrix.
+matrix (a joint family/batch contrast).
 
 \paragraph{Verification and external feedback.} \cite{wang2023selfconsistency}
 demonstrated that sampling multiple reasoning paths and taking the majority answer
@@ -1477,7 +1478,7 @@ assumption that the cross evaluations' batch shift is no larger in magnitude, an
 oppositely signed, than the largest observed run-to-run shift,
 bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
-rates alone predict; the moderation analysis adds a small percentage-point excess
+rates alone predict; the moderation analysis (Section~\ref{sec:empirical}) adds a small percentage-point excess
 over the marginals on the paired incorrect stratum, accompanied by a standardized
 association that is weak at the bottom of its range but substantial at the top
 (crude $\phi$ $0.15$--$0.59$, Fisher exact $p<0.03$

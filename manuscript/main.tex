@@ -34,13 +34,19 @@
 
 
 \begin{abstract}
-We measure whether self-evaluation catches errors. Each task contributes one immutable
+We derive, from first principles and standard information-theoretic constructs, when
+an evaluator's judgment can add almost nothing to what is already known about
+correctness: under an explicit shared-blind-spot assumption,
+$I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator contributes at most the
+information a shared latent failure variable mediates, and an observer who treats
+coupled verdicts as independent can become arbitrarily confident in errors. These
+are conditional results: they define a failure regime and its measurable
+signatures, not an inevitability. The question they motivate is empirical: do
+real evaluators exhibit the signatures? Each task contributes one immutable
 candidate, hashed before evaluation and never modified; evaluators judge without
 rewriting. For each model family we report the false-acceptance rate
 $\kappa=\Pr(A{=}1\mid T{=}0)$, the true-acceptance rate $\tau$, and the
-discrimination gap $\Delta=\tau-\kappa$, backed by a shared-blind-spot information
-bound $I(T;S\mid G)\leq I(T;Z\mid G)$ and a companion proposition on treating
-coupled verdicts as independent. A HumanEval pilot on one GPT-5.4 candidate per task
+discrimination gap $\Delta=\tau-\kappa$. A HumanEval pilot on one GPT-5.4 candidate per task
 (155 correct, 9 incorrect) calibrates the setup: self-check accepts $6/9$ incorrect
 candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
 control running the reference tests rejects all $9$. On 947 MBPP tasks across five
@@ -93,6 +99,17 @@ the third is where the remedy lies. The distinction matters because improvements
 generation do not automatically improve recognition, and because what the evaluator is
 asked to do---not simply how much computation it spends---determines what an acceptance
 verdict is worth.
+
+The research logic runs from formalization to measurement. We begin from standard
+results in information theory and probability: chain rule and data processing,
+nothing exotic. The question is what they imply for an evaluator that shares the
+generator's failure modes. The implications are conditional: they describe when an
+evaluation verdict carries little information and when repeated agreement misleads,
+not whether any given model sits in that regime. We then operationalize the regime
+through directly measurable rates: acceptance of incorrect candidates,
+discrimination gaps, residual error under repeated verdicts. The derivation precedes
+the experiments; the experiments do not verify the derivation, they measure whether
+its signatures appear in practice.
 
 \subsection{Contributions}
 

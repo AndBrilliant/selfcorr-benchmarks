@@ -51,7 +51,7 @@ $\kappa=\Pr(A{=}1\mid T{=}0)$, the true-acceptance rate $\tau$, and the
 discrimination gap $\Delta=\tau-\kappa$. A HumanEval pilot on one GPT-5.4 candidate per task
 (155 correct, 9 incorrect) calibrates the setup: self-check accepts $6/9$ incorrect
 candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
-control running the reference tests rejects all $9$. On 947 MBPP tasks across five
+control receiving reference-test outcomes rejects all $9$. On 947 MBPP tasks across five
 model families we run self-check and steelman evaluation on
 every stored candidate under a complete-response protocol that preserves
 raw responses before parsing and keeps malformed records visible in the accounting
@@ -65,14 +65,14 @@ Each family also evaluates the other families' candidates: acceptance stays elev
 for same-family evaluators after evaluator and generator fixed effects, and the effect
 survives a same-provider control, though the same-family indicator is collinear with a
 production-versus-cross run-batch difference and the two cannot be separated in this
-design (a repeated-evaluation retest, under the assumption that the cross evaluations'
-batch shift is no larger and not oppositely signed than the observed same-family
-run-to-run shift, bounds the
-batch share of the excess at $24\%$). A severity audit of 1,987 incorrect
+design (under the assumption that the cross evaluations' batch shift is no larger
+in magnitude, and not oppositely signed, than the largest observed run-to-run shift,
+two repeated-evaluation retests bound the batch share of the smallest self-check
+diagonal excess at $55\%$). A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
 crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
-Repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual
+Repeated unanimous acceptance on MBPP leaves $26.6$--$44.1\%$ residual
 error, and accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
 
@@ -130,7 +130,7 @@ its signatures appear in practice.
     acceptance in every family, with five-family Holm-adjusted significance for Qwen and
     GPT-6-Luna. Supplementary arms---repeated evaluation, candidate replication, a
     registered moderation analysis, a neutral re-examination control, and a full
-    cross-evaluation matrix---localize what the improvement is and is not
+    cross-evaluation matrix---delimit what the improvement is and is not
     (Section~\ref{sec:empirical}).
     \item \textbf{Conditional theoretical bounds.} Under a shared-blind-spot modeling
     assumption, self-evaluation is bounded in what it can add about correctness
@@ -704,7 +704,8 @@ reducing false acceptance from $6/9$ to $3/9$ while reducing false rejection fro
 $9/155$ to $6/155$. Within the nine incorrect candidates, five are accepted only by
 self-check and two only by steelman (exact McNemar $p=0.453$); execution grounding
 removed the remaining three steelman false acceptances, and across the endpoints it
-corrected 10 self-check evaluator errors while introducing 1 ($p=0.0117$). Evidence from acceptance is
+corrected 10 self-check evaluator errors while introducing 1 ($p=0.0117$, itself one
+reversed discordant pair from $p=0.065$). Evidence from acceptance is
 $0.50$ bits under self-check ($[0.09,1.42]$) and $1.53$ bits under steelman
 ($[0.57,3.00]$); with zero false acceptances in the execution arm, the plug-in ratio is
 unbounded and the transformed score interval is $[1.68,\infty)$ bits---a finite lower
@@ -712,14 +713,14 @@ endpoint, not a claim of infinite population evidence.
 
 A paired bootstrap (4,000-resample inverse-empirical-CDF percentile resampling within
 the nine-error and 155-correct strata, seed 20261104, no
-pseudocounts~\cite{efron1979bootstrap}; 100 of the 4,000 resamples yield infinite
-$\hat E$, and the exact bootstrap mass at $+\infty$, $\approx\!2.6\%$, exceeds the
-$2.5\%$ level, so the exact upper endpoint is $+\infty$ with $3.26$ a realized
-Monte-Carlo value) gives
-steelman-minus-self-check contrasts of
+pseudocounts~\cite{efron1979bootstrap}; 100 of the 4,000 resamples (empirical mass
+$2.50\%$; the exact bootstrap mass at $+\infty$ is $(6/9)^9-(1/9)^9=2.60\%$) yield
+infinite $\Delta\hat E$, so the inverse-ECDF upper endpoint is the largest finite
+draw in this seeded run)
+gives steelman-minus-self-check contrasts of
 $\Delta\hat\kappa=-0.333$ $[-0.889,0.222]$, $\Delta\hat\tau=+0.019$
-$[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,+\infty)$, with $3.26$ the realized
-Monte-Carlo upper value: the nominal, unadjusted interval includes no evidence gain, so the nine-error stratum cannot support
+$[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,3.26]$: the nominal,
+unadjusted interval includes no evidence gain, so the nine-error stratum cannot support
 a precise between-arm evidence estimate. HumanEval is therefore a clean paired
 demonstration of the diagnostic ordering, not a powered effect estimate;
 Section~\ref{sec:mbpp} supplies the powered counterpart.
@@ -764,16 +765,18 @@ of that paired set, and $\kappa=P(A^{\mathrm H}{=}1\mid T{=}0)$,
 $\tau=P(A^{\mathrm H}{=}1\mid T{=}1)$ are strict-verdict false- and true-acceptance
 rates with 95\% Wilson score intervals. $p_{\mathrm{Holm}}$ is the five-family
 Holm-adjusted value for the paired incorrect-stratum McNemar contrast. Malformed arms are excluded from paired denominators
-and reported as counts in the text, never imputed.}
+and reported as counts in the text, never imputed; the
+completion sensitivity of the primary contrasts to the missing pairs is bounded in
+Appendix~\ref{app:accounting}.}
 \label{tab:kappa_mbpp}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrr}
 \hline
 Model & Tasks & Paired & $n_{T=0}$ & $\hat\kappa$ sc/st (\%) & $\hat\tau$ sc/st (\%) & $p_{\mathrm{Holm}}$ \\
 \hline
-DeepSeek-V4.1-Flash (cloud) & 947 & 917 & 389 & 96.9 [94.7,98.2] / 94.3 [91.6,96.2] & 98.9 [97.8,99.4] / 98.9 [97.8,99.4] & 0.261 \\
+DeepSeek-V4.1-Flash (cloud) & 947 & 917 & 389 & 96.9 [94.7,98.2] / 94.3 [91.6,96.2] & 98.9 [97.5,99.5] / 98.9 [97.5,99.5] & 0.261 \\
 GLM-5.3-Flash (cloud) & 947 & 917 & 299 & 89.0 [84.9,92.0] / 85.6 [81.2,89.1] & 97.6 [96.0,98.5] / 97.6 [96.0,98.5] & 0.328 \\
-Qwen-3.8-Flash (cloud) & 947 & 940 & 413 & 94.9 [92.4,96.7] / 90.6 [87.4,93.0] & 99.2 [98.1,99.7] / 97.3 [95.4,98.3] & $1.2\times10^{-2}$ \\
+Qwen-3.8-Flash (cloud) & 947 & 940 & 413 & 94.9 [92.4,96.7] / 90.6 [87.4,93.0] & 99.2 [98.1,99.7] / 97.3 [95.6,98.4] & $1.2\times10^{-2}$ \\
 GPT-5.4 (cloud) & 947 & 938 & 427 & 90.2 [87.0,92.6] / 88.5 [85.2,91.2] & 97.1 [95.2,98.2] / 95.1 [92.9,96.7] & 0.392 \\
 GPT-6-Luna (cloud) & 947 & 943 & 432 & 93.5 [90.8,95.5] / 86.8 [83.3,89.7] & 96.5 [94.5,97.8] / 93.3 [90.8,95.2] & $2.1\times10^{-6}$ \\
 \hline
@@ -798,8 +801,7 @@ intervals below estimate different quantities: equality of the arm effect across
 correctness strata versus the combined $\tau-\kappa$ contrast). The paired discrimination-gap change has a
 95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
 $[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
-the discrimination
-improvement's interval excludes zero for GPT-6-Luna only; these intervals are
+discrimination improvement's interval excludes zero for GPT-6-Luna only; these intervals are
 per-family and unadjusted. True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
 
@@ -812,7 +814,7 @@ improvement in the reliability of accepted solutions: better internal critique i
 reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
 accepted candidates are only $0.5$--$2.8$ points more likely to be correct than the
 base rate among the same paired candidates (using correct$/$all 947 tasks instead
-shifts every gap by at most $0.2$ points). Absolute rates differ from the HumanEval measurement (86--97\%
+shifts every gap by at most $0.6$ points; largest shift $0.55$, GLM steelman). Absolute rates differ from the HumanEval measurement (86--97\%
 versus 33--67\% false acceptance); benchmarks, candidate-generating models, and
 incorrect-stratum sizes all differ, so only the ordering transfers descriptively, not
 the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
@@ -837,10 +839,10 @@ adding 18,884 events. These are repeated provider calls, not independent draws
 from a controlled sampling model. Verdicts are highly
 stable: $89.7$--$96.9\%$ of candidates receive a unanimous verdict across three rounds,
 and agreement itself is informative: candidates accepted in all three rounds carry
-$27$--$44\%$ error, versus $48$--$81\%$ for candidates accepted in only one or two
+$26.6$--$44.1\%$ error, versus $48$--$81\%$ for candidates accepted in only one or two
 rounds (Table~\ref{tab:repeated}). Repeated confident acceptance therefore does add
 evidence about correctness on a fixed candidate, but the residual error of unanimous
-acceptance stays at $27$--$44\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances
+acceptance stays at $26.6$--$44.1\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances
 move the error rate from $45.7\%$ at baseline to $43.4\%$. This is an empirical stability property,
 not a measured information-theoretic ceiling: the latent bound is not identified, and
 these data do not show that further evaluations could not improve discrimination.
@@ -891,8 +893,8 @@ cell. The verdict does contribute a small incremental signal beyond the first
 candidate's ground truth: conditional on $T_A{=}0$, a candidate the arm correctly
 rejects is followed by an incorrect replica only $53$--$93\%$ of the time, versus
 $76$--$99\%$ for a wrongly accepted one; the contrast is significant in 3 of the 10
-arm-family cells. Joint acceptance of both greedy draws carries the same
-error rate as accepting either ($25$--$44\%$ both versus $30$--$45\%$ either). The
+arm-family cells. Joint acceptance of both greedy draws carries an
+error rate broadly similar to accepting either ($25$--$44\%$ both versus $30$--$45\%$ either). The
 replication is therefore evidence of strong task-level persistence of incorrectness
 plus a modest evaluator-specific component, not evidence of shared blind spots.
 
@@ -930,13 +932,15 @@ false-acceptance rate lies between the two production arms for DeepSeek, GLM, an
 Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level for
 GPT-6-Luna. The paired control-versus-steelman contrast is significant for exactly one
 family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.026$;
-control using $0.99\times$ the steelman tokens): for Qwen, matched deliberation
+control using $0.99\times$ the steelman tokens): for Qwen, added deliberation
 without adversarial framing accepts incorrect candidates at the self-check level:
-this neutral prompt at matched token use does not reproduce the steelman reduction,
+this neutral prompt at near-equal realized token use does not reproduce the steelman reduction,
 associating Qwen's gain with the steelman protocol rather than deliberation alone. The
 contrast is fragile: reversing one existing discordant pair ($23/7$ to
-$22/8$) would raise the Holm-adjusted $p$ to $0.081$, and extreme imputation of the three incorrect candidates
-missing a control verdict bounds the Holm-adjusted $p$ to $0.026$--$0.175$, so we
+$22/8$) would raise the Holm-adjusted $p$ to $0.081$, and completion of the three
+incorrect candidates whose control verdict is missing---their observed steelman
+verdicts are two ACCEPT and one REJECT, so at most two adverse discordances are
+feasible---ranges the Holm-adjusted $p$ from $0.017$ ($24/7$) to $0.100$ ($23/9$), so we
 treat this as the control's sensitivity-flagged result rather than a robust effect. GPT-5.4
 shows the same direction with the computation imbalance reversed---control uses
 $1.44\times$ the steelman tokens yet accepts $90.6\%$ of incorrect candidates versus
@@ -945,8 +949,9 @@ steelman accept incorrect candidates at essentially the same rate ($85.8\%$ vers
 $86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
 re-engagement; that near-equality is not an equivalence result, and a modest
 adversarial-content contribution cannot be excluded. Across families the control
-undercuts the simplest pooled-level ``more tokens did it'' account: equal or greater deliberation
-reproduces the self-check blind spot in the family with the clearest steelman gain. The
+undercuts the simplest pooled-level ``more tokens did it'' account: in Qwen,
+near-equal realized deliberation ($0.99\times$ the steelman tokens) without the
+steelman protocol reproduces the self-check blind spot. The
 control has measured computation, not fully matched computation (token ratios
 $0.65$--$1.44$), and even equal average token use does not establish identical
 computation per candidate.
@@ -988,43 +993,54 @@ Table~\ref{tab:cross_matrix} gives the full matrix. Candidate-paired discordance
 $2.5$--$7.4$ to one toward external evaluators rejecting errors that the generating
 family accepted, versus the reverse, and every task-clustered
 paired-bootstrap interval is above zero. A crossed logistic model with categorical
-evaluator and generator effects and task-clustered sandwich standard errors separates
-this same-family effect from each evaluator's general permissiveness: same-family
+evaluator and generator effects and task-clustered sandwich standard errors estimates
+this same-family contrast alongside each evaluator's general permissiveness: same-family
 acceptance of incorrect candidates remains elevated under self-check
 ($\beta=1.078$, odds ratio $2.94$, $p=1.2\times10^{-36}$) and steelman
 ($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Under self-check every
 evaluator remains significant after Holm adjustment; under steelman all five do
 (Qwen weakest, Holm-adjusted $p=0.025$). One design limit is structural: the diagonal
 (same-family) cells come from the production ledger (run 2026-11-05) and the
-off-diagonal cells from the cross-evaluation ledger (run 2026-11-06/07), so the
+off-diagonal cells from the cross-evaluation ledger (runs 2026-11-06/07, with one
+later batch of $140$ records on 2026-11-16: $60$ GLM-, $60$ Qwen-, and $20$
+DeepSeek-generated candidates), so the
 same-family indicator is collinear with a production-versus-cross batch factor and the
 two cannot be separated in this design; timestamps per record are preserved in both
-ledgers. The batch factor's size is nevertheless bounded from existing data, under one
-stated assumption: the repeated-evaluation ledger re-evaluates the same frozen
-incorrect candidates with the same family in a separate run, and the same-family
-self-check false-acceptance rate, computed over every incorrect candidate with a
-complete self-check verdict (per-family denominators in the artifact), shifts by at
-most $2.2$ percentage points per family between runs, versus a diagonal
-excess of $9.2$--$11.4$ points. Treating that observed run-to-run shift as the largest
-plausible batch component of the excess---equivalently, assuming the off-diagonal
-cross evaluations' batch shift is no larger and not oppositely signed, a
-transportability assumption no cross-evaluation batch retest can test---attributes at
-most $24\%$ of the excess to batch
+ledgers. The batch factor's size is nevertheless bounded for the self-check contrast
+from existing data, under one stated assumption: the repeated-evaluation ledger
+re-evaluates the same frozen
+incorrect candidates with the same family in separate runs (two retests, both
+arms), and on matched denominators the false-acceptance rate shifts between runs
+by up to $5.1$ percentage points in the largest of the twenty arm-by-retest cells
+(shifts span $+1.2$ to $-5.1$ points; per-cell denominators in the artifact),
+versus a self-check diagonal excess of $9.2$--$11.4$ points. A batch explanation of
+that excess requires the off-diagonal cross evaluations' false acceptance to sit
+\emph{lower} in the cross batch than it would have in the production batch; assigning
+that downward shift the largest observed run-to-run magnitude, a transportability
+assumption these data contain no cross-batch retest to test, would let batch account
+for up to $55\%$
+of the smallest self-check excess (the largest observed cell shift, $5.1$ points,
+against the smallest family excess, $9.2$ points);
+the steelman-side excess is smaller (down to $2.1$ points for GPT-6-Luna), so this
+bound certifies no such statement for it
 (\texttt{data/mbpp\_v2/analysis/batch\_sensitivity.json}). Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
-difference is not a framing artifact; self-preference through familiarity with one's
+difference is not an explicit-cue artifact, though framing or provider-side differences
+not captured by identical prompts cannot be excluded; self-preference through familiarity with one's
 own phrasing remains a candidate mechanism for the excess. A second is
 self-consistency: the diagonal evaluator may be re-deriving the same greedy solution
 rather than recognizing authorship. Two families share a provider, so the matrix
 measures model-family effects, not provider independence; adding a same-provider
-indicator preserves the same-family effect (self-check odds ratio $2.06$,
+indicator preserves the same-family contrast (self-check odds ratio $2.06$,
 $p=3.5\times10^{-10}$; steelman odds ratio $1.49$, $p=3.3\times10^{-6}$).
-Cross rates also track error blatancy: the incorrect candidates of the highest-accuracy
-generator (GLM, whose error stratum is smallest at $n_{T=0}=299$) are rejected more by
-every evaluator than that evaluator's average over the other families (GLM self-check
+Cross rates also track error severity: the incorrect candidates of the highest-accuracy
+generator (GLM, whose error stratum is $n_{T=0}=308$ incorrect candidates, $304$
+with a parsed self-check verdict and $299$ fully paired)
+are rejected more by
+every external evaluator than that evaluator's average over the other external generators (GLM self-check
 cross false acceptance $73.2$--$82.5\%$). The blind spot is therefore mostly an
-evaluator property with a same-family excess on top (bounded to at most a $24\%$
-run-batch component by the repeated-evaluation retest).
+evaluator property with a same-family excess on top (with a run-batch component bounded
+at up to $55\%$ of the self-check excess under the stated transportability assumption).
 
 \begin{table}[!t]
 \centering
@@ -1082,10 +1098,11 @@ the diagnostic ordering; all powered claims rest on MBPP.
 
 \paragraph{Missing-record sensitivity.} The paired MBPP analysis uses 4,655 of 4,735
 pairs; every excluded pair has exactly one ledger-recorded cause
-(Appendix~\ref{app:accounting}). GPT-6-Luna's adjusted result is unchanged under every
-extreme imputation of the missing pairs; Qwen's remains significant unless all three of
-its missing $T{=}0$ pairs are simultaneously maximally adversarial. The full bounds are
-in Appendix~\ref{app:accounting}.
+(Appendix~\ref{app:accounting}). GPT-6-Luna's significance is unchanged under every
+completion of its missing pairs (worst-case
+$p_{\mathrm{Holm}}=3.7\times10^{-5}$, far from any conventional boundary); Qwen's
+primary contrast survives every completion that
+respects the observed verdicts (Appendix~\ref{app:accounting}).
 
 \paragraph{HumanEval call variability.} Run-to-run verdict stability was not estimated
 on HumanEval; the $4/9$ versus $3/9$ context-comparison contrast may partly reflect
@@ -1127,13 +1144,17 @@ $81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
 breakdown does not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control tests that
 question with a joint-visibility intervention, the assert shown to generation and
-evaluation together: on all 947 tasks, generation accuracy is $56.1\%$ with one example
-assert shown to both generator and evaluator, versus $55.9\%$ on the same tasks in
+evaluation together: on all 947 tasks, generation accuracy is $56.1\%$ ($531/946$
+candidates with ground truth assigned) with one example
+assert shown to both generator and evaluator, versus $55.9\%$ ($528/944$) on the same tasks in
 production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
 steelman false acceptance is $92.9\%$ versus $90.6\%$. Making one convention visible
-therefore changes neither generation accuracy nor false acceptance materially, so
-hidden-convention accounts of the acceptance levels find no support in this control;
-an evaluator-only visibility arm on the frozen production candidates was not run
+thus moves each aggregate by at most $2.4$ points, enough to reverse the arms'
+false-acceptance ordering, so the joint arm draws no per-arm conclusion and claims
+no equivalence in either direction; because the intervention is joint (generation plus
+evaluation), the control does not exclude an evaluator-only visibility effect on
+the fixed candidates, and an evaluator-only arm on the frozen production candidates
+was not run
 (\path{data/mbpp_v2/assert_visible_qwen/assert_visible_analysis_summary.txt}).
 
 \paragraph{Token-identical replicas.} The replication arm's two greedy candidates are
@@ -1349,21 +1370,23 @@ correctness channel is introduced. On the five MBPP
 families, internal evaluation accepts most incorrect candidates even after structured
 critique, and accepted candidates remain only $55$--$70\%$ correct (on the smaller
 HumanEval pilot, steelman accepts $3/9$ incorrect but accepted candidates are
-$96$--$98\%$ correct); only the external correctness channel sharply separates correct
-from incorrect (zero false acceptances in nine cases; the Wilson 95\% upper bound
-$0.30$ leaves that small stratum's rate loosely constrained). Steelman evaluation
+$96$--$98\%$ correct); the execution-grounded control shows the largest observed
+discrimination gap ($0.961$), accepting $0/9$ incorrect and $149/155$ correct
+candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
+false-acceptance rate loosely constrained. Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
 control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
-steelman reduction (a sensitivity-flagged contrast) at matched token use, while GPT-6-Luna's neutral and steelman rates
+steelman reduction (a sensitivity-flagged contrast) at near-equal realized token use
+($0.99\times$), while GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
 acceptance excess in every evaluator under self-check and in all five under
 steelman---an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design
-(though a repeated-evaluation retest of the same frozen candidates, assuming the cross
-evaluations' batch shift is no larger and not oppositely signed than the observed
-same-family run-to-run shift,
-bounds the batch share of the excess at $24\%$). Repeated unanimous acceptance carries $27$--$44\%$ residual
+(though repeated-evaluation retests of the same frozen candidates, under the
+assumption that the cross evaluations' batch shift is no larger in magnitude than
+the largest observed run-to-run shift,
+bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict.
 
@@ -1448,20 +1471,23 @@ Total & 4,655 & 17 & 50 & 13 & 80 excl.\\
 \end{tabular}}
 \end{table}
 
-Because missing verdicts are excluded rather than imputed, the paired FAR McNemar
-contrast is bounded under the most adversarial extreme imputation (every missing pair
-assigned to maximize discordance against steelman). GPT-6-Luna's adjusted result is
-unchanged under any imputation of its missing pairs (worst-case
+Because missing verdicts are excluded rather than imputed, we report extrema of
+the paired FAR
+McNemar contrast over all completions of the missing pairs that respect
+the observed verdicts. GPT-6-Luna's significance is unchanged under any completion of
+its missing pairs (worst-case
 $p_{\mathrm{Holm}}=3.7\times10^{-5}$). Qwen's primary incorrect-stratum contrast has
 complete-pair discordance $26/8$
 (self-check-accept/steelman-reject versus the reverse; the abstract's
-$p_{\mathrm{Holm}}=0.0117$ is this McNemar value at Holm rank 4 of 5). The three
-incorrect candidates missing a paired verdict, assigned maximally adversely, give
-imputed discordances $26/9$, $26/10$, and $26/11$ with
-$p_{\mathrm{Holm}}=0.0240$, $0.0453$, and $0.0803$ respectively, so any imputation
-with at most two adversarial pairs keeps $p_{\mathrm{Holm}}\le0.0453$. The three
-non-significant families remain
-non-significant under every imputation.
+$p_{\mathrm{Holm}}=0.0117$ is this McNemar value Holm-adjusted with multiplier $4$,
+Qwen carrying the second-smallest of the five family $p$-values). The three Qwen
+incorrect candidates without a complete paired verdict contribute asymmetrically:
+two carry an observed self-check ACCEPT, so their missing steelman verdict can add
+only a favorable discordance, and only the fully unobserved candidate can add an
+adverse one. The feasible completions therefore range from $29/8$
+($p_{\mathrm{Holm}}=0.0030$) to $26/9$ ($p_{\mathrm{Holm}}=0.0240$), and the
+primary result survives every completion. The three non-significant families remain
+non-significant under every completion.
 
 \section{A Predictive Interpretation}
 \label{app:mechanism}

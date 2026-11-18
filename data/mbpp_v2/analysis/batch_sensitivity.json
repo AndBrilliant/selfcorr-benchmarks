@@ -1,56 +1,249 @@
 {
-  "schema": "mbpp-v2-batch-sensitivity/1",
+  "schema": "mbpp-v2-batch-sensitivity/2",
   "batch_windows": {
     "production_evals": "2026-11-05T03:03Z..2026-11-05T12:01Z",
     "repeated_evals": "2026-11-05T13:25Z..2026-11-06T01:28Z",
-    "cross_evals": "2026-11-06T06:10Z..2026-11-16T23:04Z"
+    "cross_evals": "2026-11-06T06:10Z..2026-11-16T23:04Z",
+    "note": "cross ledger spans 2026-11-06/07 plus a 140-record batch on 2026-11-16 (60 GLM-, 60 Qwen-, and 20 DeepSeek-generated candidates)"
   },
   "families": {
     "ds-v4-flash": {
       "same_family_production_fa_pct": 96.94,
-      "same_family_repeated_fa_pct": 95.35,
-      "off_diagonal_cross_fa_pct": 87.69,
-      "diagonal_excess_pct_points": 9.24,
-      "run_to_run_shift_pct_points": -1.59,
+      "off_diagonal_cross_fa_pct": 87.75,
+      "diagonal_excess_pct_points": 9.19,
       "n_incorrect": 392
     },
     "glm-5.3-flash": {
       "same_family_production_fa_pct": 88.82,
-      "same_family_repeated_fa_pct": 86.64,
-      "off_diagonal_cross_fa_pct": 77.46,
-      "diagonal_excess_pct_points": 11.35,
-      "run_to_run_shift_pct_points": -2.17,
+      "off_diagonal_cross_fa_pct": 77.68,
+      "diagonal_excess_pct_points": 11.14,
       "n_incorrect": 304
     },
     "gpt-5.4": {
       "same_family_production_fa_pct": 90.07,
-      "same_family_repeated_fa_pct": 90.53,
       "off_diagonal_cross_fa_pct": 79.72,
       "diagonal_excess_pct_points": 10.35,
-      "run_to_run_shift_pct_points": 0.46,
       "n_incorrect": 433
     },
     "gpt-6-luna": {
       "same_family_production_fa_pct": 93.52,
-      "same_family_repeated_fa_pct": 91.44,
-      "off_diagonal_cross_fa_pct": 83.51,
-      "diagonal_excess_pct_points": 10.01,
-      "run_to_run_shift_pct_points": -2.08,
+      "off_diagonal_cross_fa_pct": 83.59,
+      "diagonal_excess_pct_points": 9.93,
       "n_incorrect": 432
     },
     "qwen38-flash": {
       "same_family_production_fa_pct": 94.94,
-      "same_family_repeated_fa_pct": 95.18,
-      "off_diagonal_cross_fa_pct": 83.53,
-      "diagonal_excess_pct_points": 11.41,
-      "run_to_run_shift_pct_points": 0.24,
+      "off_diagonal_cross_fa_pct": 83.51,
+      "diagonal_excess_pct_points": 11.43,
       "n_incorrect": 415
     }
   },
+  "matched_run_to_run_cells": [
+    {
+      "family": "ds-v4-flash",
+      "arm": "self-check",
+      "repeat": "r2",
+      "n_matched": 387,
+      "production_fa_pct": 96.899,
+      "repeat_fa_pct": 95.349,
+      "shift_pct_points": -1.55,
+      "abs_shift_pct_points": 1.55
+    },
+    {
+      "family": "ds-v4-flash",
+      "arm": "self-check",
+      "repeat": "r3",
+      "n_matched": 386,
+      "production_fa_pct": 96.891,
+      "repeat_fa_pct": 96.373,
+      "shift_pct_points": -0.518,
+      "abs_shift_pct_points": 0.518
+    },
+    {
+      "family": "ds-v4-flash",
+      "arm": "steelman",
+      "repeat": "r2",
+      "n_matched": 389,
+      "production_fa_pct": 94.344,
+      "repeat_fa_pct": 95.373,
+      "shift_pct_points": 1.028,
+      "abs_shift_pct_points": 1.028
+    },
+    {
+      "family": "ds-v4-flash",
+      "arm": "steelman",
+      "repeat": "r3",
+      "n_matched": 386,
+      "production_fa_pct": 94.56,
+      "repeat_fa_pct": 94.819,
+      "shift_pct_points": 0.259,
+      "abs_shift_pct_points": 0.259
+    },
+    {
+      "family": "glm-5.3-flash",
+      "arm": "self-check",
+      "repeat": "r2",
+      "n_matched": 292,
+      "production_fa_pct": 89.384,
+      "repeat_fa_pct": 86.644,
+      "shift_pct_points": -2.74,
+      "abs_shift_pct_points": 2.74
+    },
+    {
+      "family": "glm-5.3-flash",
+      "arm": "self-check",
+      "repeat": "r3",
+      "n_matched": 295,
+      "production_fa_pct": 89.492,
+      "repeat_fa_pct": 84.407,
+      "shift_pct_points": -5.085,
+      "abs_shift_pct_points": 5.085
+    },
+    {
+      "family": "glm-5.3-flash",
+      "arm": "steelman",
+      "repeat": "r2",
+      "n_matched": 295,
+      "production_fa_pct": 86.102,
+      "repeat_fa_pct": 81.017,
+      "shift_pct_points": -5.085,
+      "abs_shift_pct_points": 5.085
+    },
+    {
+      "family": "glm-5.3-flash",
+      "arm": "steelman",
+      "repeat": "r3",
+      "n_matched": 297,
+      "production_fa_pct": 86.195,
+      "repeat_fa_pct": 84.512,
+      "shift_pct_points": -1.684,
+      "abs_shift_pct_points": 1.684
+    },
+    {
+      "family": "gpt-5.4",
+      "arm": "self-check",
+      "repeat": "r2",
+      "n_matched": 433,
+      "production_fa_pct": 90.069,
+      "repeat_fa_pct": 90.531,
+      "shift_pct_points": 0.462,
+      "abs_shift_pct_points": 0.462
+    },
+    {
+      "family": "gpt-5.4",
+      "arm": "self-check",
+      "repeat": "r3",
+      "n_matched": 433,
+      "production_fa_pct": 90.069,
+      "repeat_fa_pct": 90.3,
+      "shift_pct_points": 0.231,
+      "abs_shift_pct_points": 0.231
+    },
+    {
+      "family": "gpt-5.4",
+      "arm": "steelman",
+      "repeat": "r2",
+      "n_matched": 427,
+      "production_fa_pct": 88.525,
+      "repeat_fa_pct": 86.885,
+      "shift_pct_points": -1.639,
+      "abs_shift_pct_points": 1.639
+    },
+    {
+      "family": "gpt-5.4",
+      "arm": "steelman",
+      "repeat": "r3",
+      "n_matched": 427,
+      "production_fa_pct": 88.525,
+      "repeat_fa_pct": 85.246,
+      "shift_pct_points": -3.279,
+      "abs_shift_pct_points": 3.279
+    },
+    {
+      "family": "gpt-6-luna",
+      "arm": "self-check",
+      "repeat": "r2",
+      "n_matched": 432,
+      "production_fa_pct": 93.519,
+      "repeat_fa_pct": 91.435,
+      "shift_pct_points": -2.083,
+      "abs_shift_pct_points": 2.083
+    },
+    {
+      "family": "gpt-6-luna",
+      "arm": "self-check",
+      "repeat": "r3",
+      "n_matched": 432,
+      "production_fa_pct": 93.519,
+      "repeat_fa_pct": 92.361,
+      "shift_pct_points": -1.157,
+      "abs_shift_pct_points": 1.157
+    },
+    {
+      "family": "gpt-6-luna",
+      "arm": "steelman",
+      "repeat": "r2",
+      "n_matched": 434,
+      "production_fa_pct": 86.866,
+      "repeat_fa_pct": 87.788,
+      "shift_pct_points": 0.922,
+      "abs_shift_pct_points": 0.922
+    },
+    {
+      "family": "gpt-6-luna",
+      "arm": "steelman",
+      "repeat": "r3",
+      "n_matched": 434,
+      "production_fa_pct": 86.866,
+      "repeat_fa_pct": 86.636,
+      "shift_pct_points": -0.23,
+      "abs_shift_pct_points": 0.23
+    },
+    {
+      "family": "qwen38-flash",
+      "arm": "self-check",
+      "repeat": "r2",
+      "n_matched": 415,
+      "production_fa_pct": 94.94,
+      "repeat_fa_pct": 95.181,
+      "shift_pct_points": 0.241,
+      "abs_shift_pct_points": 0.241
+    },
+    {
+      "family": "qwen38-flash",
+      "arm": "self-check",
+      "repeat": "r3",
+      "n_matched": 412,
+      "production_fa_pct": 94.903,
+      "repeat_fa_pct": 94.417,
+      "shift_pct_points": -0.485,
+      "abs_shift_pct_points": 0.485
+    },
+    {
+      "family": "qwen38-flash",
+      "arm": "steelman",
+      "repeat": "r2",
+      "n_matched": 413,
+      "production_fa_pct": 90.557,
+      "repeat_fa_pct": 91.768,
+      "shift_pct_points": 1.211,
+      "abs_shift_pct_points": 1.211
+    },
+    {
+      "family": "qwen38-flash",
+      "arm": "steelman",
+      "repeat": "r3",
+      "n_matched": 410,
+      "production_fa_pct": 90.732,
+      "repeat_fa_pct": 91.707,
+      "shift_pct_points": 0.976,
+      "abs_shift_pct_points": 0.976
+    }
+  ],
   "summary": {
-    "max_run_to_run_shift_pct_points": 2.17,
-    "min_diagonal_excess_pct_points": 9.24,
-    "max_fraction_of_excess_attributable_to_batch": 0.2349,
-    "interpretation": "Same-family self-check false acceptance on identical frozen incorrect candidates shifts by at most the stated run-to-run amount between two independent runs. Treating that shift as the largest plausible batch component of the diagonal excess assumes the off-diagonal (cross-evaluation) cells' batch shift is no larger and not oppositely signed -- a transportability assumption that no cross-evaluation batch retest in these data can test. Under that assumption the batch share of the excess is bounded as stated."
+    "max_abs_run_to_run_shift_pct_points": 5.08,
+    "min_diagonal_excess_pct_points": 9.19,
+    "max_fraction_of_excess_attributable_to_batch": 0.5533,
+    "interpretation": "All shifts are computed on matched denominators (identical candidate sets per cell). The largest observed run-to-run shift across the twenty arm-by-repeat cells bounds the largest plausible batch component of the diagonal excess UNDER the transportability assumption stated in the manuscript: the off-diagonal (cross-evaluation) cells' batch shift is no larger in magnitude than the largest observed same-family run-to-run shift, and not oppositely signed. That assumption is untestable from these data (no cross-evaluation batch retest exists). Under it, batch could account for up to the stated fraction of the smallest diagonal excess; equivalently the family component is at least the remainder. This bound is weaker than the previous schema/1 value (24%), which used self-check R2 only on unequal denominators and understated observed run-to-run variability."
   }
 }

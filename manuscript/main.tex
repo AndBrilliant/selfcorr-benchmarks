@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\title{Limits of Self-Correction in LLMs: When Self-Evaluation Accepts Wrong Answers}
+\title{False Acceptance in LLM Self-Evaluation: Paired Measurements on Frozen Candidates}
 
 \author{Andrew~Michael~Brilliant,
         \orcidlink{0009-0004-8024-5442}%
@@ -25,7 +25,7 @@
 }
 
 \markboth{International Journal of Computer Science (IJCS)}%
-{Brilliant: Limits of Self-Correction in LLMs}
+{Brilliant: False Acceptance in LLM Self-Evaluation}
 
 \maketitle
 
@@ -35,55 +35,31 @@
 
 
 \begin{abstract}
-We derive, from first principles and standard information-theoretic constructs, when
-an evaluator's judgment can add almost nothing to what is already known about
-correctness: with $T$ the correctness indicator, $S$ the evaluator's verdict, $G$
-the candidate and its visible context, and $Z$ a latent variable shared between
-generator and evaluator, the shared-blind-spot assumption
+We ask what an LLM evaluator's ACCEPT verdict is worth. From standard
+information-theoretic constructs: with $T$ the correctness indicator, $S$ the
+evaluator's verdict, $G$ the generator's candidate output, and $Z$ a latent
+variable shared between generator and evaluator, the shared-blind-spot assumption
 $S\perp T\mid(G,Z)$ gives
-$I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator contributes at most the
-information a shared latent failure variable mediates, a cap that is restrictive
-exactly when the shared variable carries little information about correctness.
-Separately, an observer who treats coupled verdicts as independent can become
-arbitrarily confident in errors. These
-are conditional results: they define a failure regime and its measurable
-signatures, not an inevitability. The question they motivate is empirical: do
-real evaluators exhibit the signatures? Each task contributes one immutable
-candidate, hashed before evaluation and never modified; evaluators judge without
-rewriting. For each model family we report the false-acceptance rate
-$\kappa=\Pr(A{=}1\mid T{=}0)$, the true-acceptance rate $\tau$, and the
-discrimination gap $\Delta=\tau-\kappa$. A HumanEval pilot on one GPT-5.4 candidate per task
-(155 correct, 9 incorrect) calibrates the setup: self-check accepts $6/9$ incorrect
-candidates, structured steelman evaluation accepts $3/9$, and an execution-grounded
-control receiving reference-test outcomes rejects all $9$. On 947 MBPP tasks across five
-model families we run self-check and steelman evaluation on
-every stored candidate under a complete-response protocol that preserves
-raw responses before parsing and keeps malformed records visible in the accounting
-with fixed denominators,
-with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family
-(overall verdict accuracy shows no significant improvement in any family: the full-population arm discordance
-is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
-incorrect stratum; for Qwen a uniform threshold shift is also compatible with the
-data, and discrimination improvement's interval excludes zero only for GPT-6-Luna),
-surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
-($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a separately-ledgered
-contrast exposed to run-batch differences in both magnitude and direction:
-candidate-pairing removes composition confounding, not batch confounding, and one
-reversed discordant pair is enough to lose Holm significance), and
-for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
-Each family also evaluates the other families' candidates: acceptance stays elevated
-for same-family evaluators after evaluator and generator fixed effects, and the effect
-survives a same-provider control, though the same-family indicator is collinear with a
-production-versus-cross run-batch difference and the two cannot be separated in this
-design (under the assumption that the cross evaluations' batch shift is no larger
-in magnitude, and not oppositely signed, than the largest observed run-to-run shift,
-two repeated-evaluation retests bound the batch share of the smallest self-check
-diagonal excess at $55\%$). A severity audit of 1,987 incorrect
-candidates finds $84.4\%$ fail every reference assert. Across all
-1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
-crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
-Repeated unanimous acceptance on MBPP leaves $26.6$--$44.1\%$ residual
-error under the benchmark's hidden reference-assert criterion, and accepted candidates remain only $55$--$70\%$ correct under the same criterion.
+$I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator adds at most the information
+the shared variable mediates; an observer who treats coupled verdicts as
+independent can become arbitrarily confident in errors. These are conditional
+results defining a failure regime and its measurable signatures, not an
+inevitability; the question they motivate is empirical. We measure the
+signatures on frozen candidates, one per task, hashed before evaluation and
+never modified. On 947 MBPP tasks across five model families under a
+complete-response protocol with fixed denominators, self-check accepts
+$89$--$97\%$ of incorrect candidates; an accepted candidate is only
+$0.5$--$2.8$ points more likely to be correct than the unfiltered pool, and
+three unanimous acceptances still leave $26.6$--$44.1\%$ residual error.
+Structured steelman evaluation in a clean context lowers false acceptance in
+every family by $1.7$--$6.7$ points (Holm-significant for Qwen and
+GPT-6-Luna) at a true-acceptance cost of at most $3.2$ points: a favorable
+trade whenever a false acceptance costs more than one regeneration.
+Cross-evaluation shows permissiveness is largely evaluator-general, with a
+same-family excess whose batch share is bounded by repeated-evaluation
+retests. A severity audit of 1,987 incorrect candidates finds $84.4\%$ fail
+every reference assert. Better internal critique is not validation; the
+remedy is an independent correctness channel.
 \end{abstract}
 
 \begin{IAENGkeywords}
@@ -161,10 +137,13 @@ its signatures appear in practice.
 \end{enumerate}
 
 \paragraph{Scope.} This is an \emph{empirical measurement paper with a conditional
-theoretical framework}, not an impossibility paper. The information bounds are standard
-chain-rule and data-processing consequences whose role is to organize the measurable
-quantities, not to constitute a new limitation theorem. The central negative results
-assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
+theoretical framework}, not an impossibility paper. The information bounds are
+proved by standard chain-rule and data-processing arguments; the contribution is
+the formulation — identifying self-evaluation failure with latent-variable
+mediation and deriving its measurable signatures — not new proof machinery. That
+is deliberate: a framework built from standard tools can be checked step by step
+without a bespoke formalism, and its force comes from what it predicts about
+observable rates. The central negative results assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
 is so corrupted by shared blind spots that the input itself supplies no residual
 correctness signal. Selectors whose verdicts actually draw on an independent ground-truth
 channel (a proof checker,
@@ -293,6 +272,15 @@ theorems formalize distinct consequences: an information-theoretic ceiling
 informative, but positive association alone does not imply negligible evidence: the
 evidence bound is determined by measurable acceptance rates, whereas the ceiling
 additionally requires the latent-variable assumptions.
+
+A conditional theory is not tested by exhibiting its latent variable; it is tested
+by whether the observable signatures it predicts appear in the data. The signatures
+here are rates, not constructs: acceptance of incorrect candidates, discrimination
+gaps, and the evidence carried by repeated agreement. Sections~\ref{sec:empirical}
+and~\ref{sec:mechanism} measure exactly these. The inferential shape is standard in
+measurement science: Bell-type inequalities are conditional on unobserved
+variables and are tested through observable correlations; here, the conditional
+independence is the scope condition and the acceptance rates are the test.
 
 \subsection{Information-Theoretic Scaffolding: Bounding What $Z$ Mediates}
 
@@ -833,6 +821,12 @@ incorrect-stratum contrasts is the only family-wise-adjusted inference, and the
 headline paired conclusions rest on that set (secondary conclusions are labeled
 descriptive or carry the per-set adjustments named above). True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
+The value of the trade depends on the cost model. If a false acceptance is more
+expensive than one regeneration of a rejected candidate — the usual case in code
+pipelines, where a shipped defect costs more than an API call — the steelman
+trade is favorable in every family, because a rejected candidate is not discarded
+but sent around the loop again; the largest observed true-acceptance cost is
+3.2 points.
 
 The practical reliability of accepted candidates moves correspondingly little: among
 candidates an arm accepts, the fraction correct is $55$--$70\%$ and improves by at most
@@ -840,7 +834,9 @@ $1.0$ points under steelman (Qwen $57.2\%\rightarrow57.8\%$, GPT-6-Luna
 $55.0\%\rightarrow56.0\%$, GPT-5.4 flat at $56.3\%\rightarrow56.2\%$). A statistically
 detectable reduction in false acceptance therefore does not translate into a large
 improvement in the reliability of accepted solutions: better internal critique is not
-reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
+reliable validation. Graded by pooled accuracy the gain looks modest; graded as a
+triage filter — rejects routed to regeneration or review, not discarded — it is the
+operational one, obtained for a prompt change alone. Acceptance itself buys almost nothing over the unfiltered pool:
 accepted candidates are only $0.5$--$2.8$ points more likely to be correct than the
 base rate among the same paired candidates (using correct$/$all 947 tasks instead
 shifts every gap by at most $0.6$ points; largest: GLM steelman). Absolute rates differ from the HumanEval measurement (86--97\%

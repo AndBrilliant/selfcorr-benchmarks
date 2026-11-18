@@ -2,6 +2,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{xurl}
 \usepackage{orcidlink}
 
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -896,7 +897,7 @@ Repeated-evaluation denominators are arm-specific: $n$ counts candidates with a 
 verdict in all three rounds of that arm and does not require a parsed verdict in the
 other arm, so it differs from the production paired stratum.
 
-\begin{table}[!t]
+\begin{table*}[!t]
 \centering
 \caption{Repeated evaluation ($k{=}3$ rounds per arm, temperature zero).
 $n$ is the number of candidates with a parsed verdict in all three rounds;
@@ -920,7 +921,7 @@ GPT-6-Luna & self-check & 941 & 45.1 (895) & 44.3 (873) & 44.1 (866) & 68.1 (47)
  & steelman & 946 & 44.1 (855) & 43.6 (835) & 43.0 (821) & 67.1 (70) \\
 \hline
 \end{tabular}
-\end{table}
+\end{table*}
 
 \paragraph{Candidate replication.} A full replication generated a second greedy
 candidate for every (task, model) cell, so ground truth varies within cells. The two
@@ -1099,7 +1100,7 @@ against the smallest family excess, $9.2$ points);
 the steelman-side excess is smaller (down to $2.1$ points for GPT-6-Luna), so the
 bound does not constrain the steelman contrast, which for the same reason cannot be
 read as an evaluator-leniency effect either
-(\texttt{data/mbpp\_v2/analysis/batch\_sensitivity.json}). Prompts and decoding
+(\texttt{data/mbpp\_v2/analysis/}\allowbreak\texttt{batch\_sensitivity.json}). Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
 difference is not an explicit-cue artifact, though framing or provider-side differences
 not captured by identical prompts cannot be excluded; self-preference through familiarity with one's

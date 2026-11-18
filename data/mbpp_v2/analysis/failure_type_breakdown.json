@@ -29,5 +29,9 @@
    "runtime crash or pre-execution guard block": 144
   }
  },
- "method": "AST check for required entry-point definition + test_reason classification (crash-or-guard-block vs assertion)"
+ "method": "AST check for required entry-point definition + test_reason classification (crash-or-guard-block vs assertion)",
+ "crash_or_guard_block_split": {
+  "runtime_crash": 724,
+  "pre_execution_guard_block": 12
+ }
 }

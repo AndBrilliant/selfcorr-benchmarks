@@ -58,9 +58,9 @@ for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same ra
 Each family also evaluates the other families' candidates: acceptance stays elevated
 for same-family evaluators after evaluator and generator fixed effects, and the
 effect survives a same-provider control. A severity audit of 1,987 incorrect
-candidates finds $84.4\%$ fail every reference assert, mostly wrong values
-($62.8\%$) and the remainder ($37.0\%$) split between runtime crashes and
-pre-execution guard blocks. Consistent with the amplification proposition,
+candidates finds $84.4\%$ fail every reference assert: $62.8\%$ on wrong values,
+$37.0\%$ in the crash-or-guard-block bucket, and $0.2\%$ with a missing or renamed
+entry point. Consistent with the amplification proposition,
 repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual error, and on
 MBPP accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
@@ -1121,8 +1121,9 @@ checks select under computational ground truth; the interpreter does not care ho
 confident the generator was. This is the channel instantiated by the execution-grounded
 control in Section~\ref{sec:empirical}; it shows zero observed false acceptances there,
 although the verdicts remain model outputs (it also falsely rejects six PASS
-candidates); nine observations bound nothing, so this is an observed result, not a
-guarantee. It marks what a
+candidates); zero false acceptances in nine cases is an observed result, not a
+guarantee, and the Wilson 95% interval $[0.000,0.299]$ leaves the underlying rate
+substantially unconstrained. It marks what a
 direct computational correctness channel buys.
 
 \paragraph{Numerical invariants and retrieval grounding.} Dimensional analysis,

@@ -119,11 +119,15 @@ def main() -> int:
         "breakdown": {cat: breakdown[cat] for cat in CATEGORIES},
         "per_model": per_model_out,
         "method": "AST check for required entry-point definition + test_reason classification (crash-or-guard-block vs assertion)",
+        "crash_or_guard_block_split": {
+            "runtime_crash": crash_total - exception_counts.get("Blocked AST guard", 0),
+            "pre_execution_guard_block": exception_counts.get("Blocked AST guard", 0),
+        },
     }, indent=1))
     (out / "crash_exception_breakdown.json").write_text(json.dumps({
         "total_crash_or_guard_block": crash_total,
         "by_exception": dict(exception_counts),
-        "method": "test_reason string classification of the crash-or-guard-block bucket (724 genuine runtime crashes plus 12 pre-execution AST-guard blocks)",
+        "method": "test_reason string classification of the crash-or-guard-block bucket; see crash_or_guard_block_split in failure_type_breakdown.json for the runtime-crash vs pre-execution-guard-block split",
     }, indent=1))
 
     print(f"incorrect candidates: {len(incorrect)}")

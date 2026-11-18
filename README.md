@@ -73,9 +73,11 @@ qualifying stratum unchanged relative to the floor.
 
 Ledger directories carry `manifest.sha256` over their raw files
 (HumanEval's is `MANIFEST.sha256`). The failure-type breakdown labels its
-largest bucket "runtime crash or pre-execution guard block" (724 genuine
-runtime crashes plus 12 pre-execution AST-guard blocks); its exception
-breakdown reports that bucket under `total_crash_or_guard_block`.
+736-case bucket "runtime crash or pre-execution guard block" and reports the
+split under `crash_or_guard_block_split` (724 genuine runtime crashes plus 12
+pre-execution AST-guard blocks; the 1,248-case assertion-failure bucket is the
+larger one); its exception breakdown reports that bucket under
+`total_crash_or_guard_block`.
 
 Reproducibility note: after an internal consistency audit, 35 cross-evaluation
 cells were re-evaluated on the corrected candidates; all raw events, including

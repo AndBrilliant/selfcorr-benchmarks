@@ -59,7 +59,8 @@ Each family also evaluates the other families' candidates: acceptance stays elev
 for same-family evaluators after evaluator and generator fixed effects, and the
 effect survives a same-provider control. A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert, mostly wrong values
-($62.8\%$) and crashes ($37.0\%$). Consistent with the amplification proposition,
+($62.8\%$) and the remainder ($37.0\%$) split between runtime crashes and
+pre-execution guard blocks. Consistent with the amplification proposition,
 repeated unanimous acceptance on MBPP leaves $27$--$44\%$ residual error, and on
 MBPP accepted candidates remain only $55$--$70\%$ correct.
 \end{abstract}
@@ -663,9 +664,7 @@ Execution-grounded & \textbf{0/9} & \textbf{0.000 [0.000, 0.299]} & 149/155 & \t
 
 The two internal arms are ordered in false acceptance: $\hat\kappa$ falls from $6/9$
 to $3/9$ while true acceptance rises from $146/155$ to $149/155$; the execution control
-rejects all nine incorrect candidates (zero observed false acceptances; the verdicts
-are model outputs, not a mechanical relabeling of $T$, as its six false rejections of
-PASS candidates show). The discrimination gaps are
+rejects all nine incorrect candidates (zero observed false acceptances). The discrimination gaps are
 $\hat\Delta=0.275$, $0.628$, and $0.961$. The oracle arm nevertheless rejects six
 PASS candidates, so its verdicts are not a mechanical relabeling of $T$. All six
 responses are a bare ``NO'' under a verdict-only prompt, so no rationale is preserved;
@@ -1122,7 +1121,8 @@ checks select under computational ground truth; the interpreter does not care ho
 confident the generator was. This is the channel instantiated by the execution-grounded
 control in Section~\ref{sec:empirical}; it shows zero observed false acceptances there,
 although the verdicts remain model outputs (it also falsely rejects six PASS
-candidates), so the guarantee is empirical, not constructive. It marks what a
+candidates); nine observations bound nothing, so this is an observed result, not a
+guarantee. It marks what a
 direct computational correctness channel buys.
 
 \paragraph{Numerical invariants and retrieval grounding.} Dimensional analysis,

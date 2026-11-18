@@ -8,8 +8,10 @@ generation harness:
   missing/renamed entry point  - candidate AST does not define the function the
                                  reference asserts call
   runs, wrong values (assertion failure)  - executed; failed on assertion values
-  crash/exception at runtime   - anything else (traceback, blocked AST guard,
-                                 syntax error)
+  runtime crash or pre-execution guard block  - anything else (traceback, blocked
+                                  AST guard, syntax error); of the 736 in this bucket
+                                  724 are genuine runtime crashes and 12 are blocked
+                                  before execution by the AST guard
 
 Crash records are further grouped by exception class parsed from the recorded
 traceback. Deterministic; reads ledgers only, no code execution, no network.
@@ -26,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 VALUES = "runs, wrong values (assertion failure)"
-CRASH = "crash/exception at runtime"
+CRASH = "runtime crash or pre-execution guard block"
 MISSING = "missing/renamed entry point"
 CATEGORIES = [VALUES, CRASH, MISSING]
 
@@ -116,12 +118,12 @@ def main() -> int:
         "total_incorrect": len(incorrect),
         "breakdown": {cat: breakdown[cat] for cat in CATEGORIES},
         "per_model": per_model_out,
-        "method": "AST check for required entry-point definition + test_reason classification (crash vs assertion)",
+        "method": "AST check for required entry-point definition + test_reason classification (crash-or-guard-block vs assertion)",
     }, indent=1))
     (out / "crash_exception_breakdown.json").write_text(json.dumps({
-        "total_crashes": crash_total,
+        "total_crash_or_guard_block": crash_total,
         "by_exception": dict(exception_counts),
-        "method": "test_reason string classification of production candidates with runtime crashes",
+        "method": "test_reason string classification of the crash-or-guard-block bucket (724 genuine runtime crashes plus 12 pre-execution AST-guard blocks)",
     }, indent=1))
 
     print(f"incorrect candidates: {len(incorrect)}")

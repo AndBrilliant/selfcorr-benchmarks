@@ -1,5 +1,5 @@
 {
- "total_crashes": 736,
+ "total_crash_or_guard_block": 736,
  "by_exception": {
   "Other exception": 112,
   "TypeError": 590,
@@ -8,5 +8,5 @@
   "NameError": 9,
   "ValueError": 8
  },
- "method": "test_reason string classification of production candidates with runtime crashes"
+ "method": "test_reason string classification of the crash-or-guard-block bucket (724 genuine runtime crashes plus 12 pre-execution AST-guard blocks)"
 }

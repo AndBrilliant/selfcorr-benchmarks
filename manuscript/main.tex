@@ -330,7 +330,9 @@ If additionally $T \perp Z \mid G$, then $I(T; Z \mid G) = 0$ and the result fol
 The bound is non-vacuous only under two conditions: (1)~$Z$ is constrained
 independently of $T$ and $S$ (without this, $Z$ could always be chosen post hoc to encode
 all residual dependence between $S$ and $T$, rendering the bound trivially satisfied), and
-(2)~$I(T; Z \mid G)$ is shown to be small, so the cap is tight; if $Z$ carries substantial
+(2)~$I(T; Z \mid G)$ is shown to be small, so the cap is restrictive rather than
+merely finite (tightness would additionally require bounding the slack
+$I(T; Z \mid G, S)$); if $Z$ carries substantial
 information about correctness beyond what $G$ reveals, the bound permits $S$ to be highly
 informative. Theorem~\ref{thm:info_bound} therefore identifies a structural
 relationship (information from $S$ is $Z$-mediated) rather than proving that
@@ -1222,9 +1224,11 @@ self-check-excess discordance significant ($48$ vs $11$ paired discordants, exac
 $p=2.5\times10^{-6}$); among the $1{,}230$ candidates that run and fail on values the
 rates are $92.4\%$ ($1136/1230$; $[90.7,93.7]$) and $89.3\%$ ($[87.5,91.0]$),
 discordance $83$ vs $46$ ($p=2.9\times10^{-3}$); the three missing-entry-point
-candidates are negligible. If anything the level is highest on candidates whose
-visible code fails outright, and the steelman improvement holds within both failure
-types. This breakdown, however, does
+candidates are negligible. If anything the level is highest on candidates that crash at runtime
+($94.4\%$), though $590/724$ of those crashes are \texttt{TypeError}s raised under the
+hidden reference asserts rather than on any test visible to the evaluator, so the
+stratum mixes outright failures with hidden-convention mismatches; the steelman
+improvement holds within both failure types. This breakdown, however, does
 not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control tests that
 question with a joint-visibility intervention, the assert shown to generation and
@@ -1459,13 +1463,16 @@ $96$--$98\%$ correct); the execution-grounded control shows the largest observed
 discrimination gap ($0.961$), accepting $0/9$ incorrect and $149/155$ correct
 candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
 false-acceptance rate loosely constrained. Steelman evaluation
-reduces false acceptance in every family; the neutral re-examination control, at
-near-equal realized token use
-($0.99\times$), reproduces the reduction in no family (Qwen $p=0.14$, a separately
-ledgered contrast exposed to run-batch differences in both magnitude and direction;
-candidate-pairing removes composition confounding,
-not batch confounding), and GPT-6-Luna's neutral and steelman rates
-are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
+reduces false acceptance in every family. The neutral
+re-examination control lands between the two production arms for DeepSeek, GLM,
+and Qwen, at the self-check level for GPT-5.4, and at the steelman level for
+GPT-6-Luna; the paired control-versus-steelman contrast is significant only for
+Qwen ($p=0.0052$, Holm-adjusted $0.026$, control using $0.99\times$ the steelman
+tokens), a separately
+ledgered contrast exposed to run-batch differences in both magnitude and direction
+(candidate-pairing removes composition confounding, not batch confounding), so the
+gain's association with the protocol rather than added deliberation alone is
+reported, not attributed. The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
 acceptance excess in every evaluator under both arms: an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design

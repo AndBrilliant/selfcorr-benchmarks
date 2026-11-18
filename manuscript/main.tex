@@ -58,11 +58,14 @@ raw responses before parsing and keeps malformed records visible in the accounti
 with fixed denominators,
 with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family,
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
-($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction, and
+($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a
+contrast one opposing discordant pair from losing Holm significance), and
 for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
 Each family also evaluates the other families' candidates: acceptance stays elevated
-for same-family evaluators after evaluator and generator fixed effects, and the
-effect survives a same-provider control. A severity audit of 1,987 incorrect
+for same-family evaluators after evaluator and generator fixed effects, and the effect
+survives a same-provider control, though the same-family indicator is collinear with a
+production-versus-cross run-batch difference and the two cannot be separated in this
+design. A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
 crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
@@ -149,8 +152,10 @@ chain-rule and data-processing consequences whose role is to organize the measur
 quantities, not to constitute a new limitation theorem. The central negative results
 assume $S\perp T\mid(G,Z)$: a specific failure regime in which the selector's evaluation
 is so corrupted by shared blind spots that the input itself supplies no residual
-correctness signal. Selectors with an independent ground-truth channel---a proof checker,
-test executor, or independently trained model---fall outside that regime. Cross-generator
+correctness signal. Selectors whose verdicts actually draw on an independent ground-truth
+channel---a proof checker,
+test executor, or independently trained model---violate that conditional independence
+and fall outside the regime. Cross-generator
 error agreement is independently documented at scale~\cite{kim2025correlated}, though
 agreement between generators is not itself evidence of evaluator false acceptance. We do
 not claim all self-evaluation fails, only that it can fail in this regime, and we measure
@@ -1329,12 +1334,13 @@ HumanEval pilot, steelman accepts $3/9$ incorrect but accepted candidates are
 $96$--$98\%$ correct); only the external correctness channel sharply separates correct
 from incorrect. Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
-mechanistically split: Qwen's neutral re-examination prompt fails to reproduce the
-steelman reduction at matched token use, while GPT-6-Luna's neutral and steelman rates
+control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
+steelman reduction (a sensitivity-flagged contrast) at matched token use, while GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
 acceptance excess in every evaluator under self-check and in all five under
-steelman. Repeated unanimous acceptance carries $27$--$44\%$ residual
+steelman---an excess collinear with a production-versus-cross run-batch difference, so
+the same-family contrast and the batch factor cannot be separated in this design. Repeated unanimous acceptance carries $27$--$44\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict.
 

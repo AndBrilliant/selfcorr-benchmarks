@@ -867,7 +867,8 @@ discrimination across the two extra calls (Table~\ref{tab:repeated}).
 Repeated confident acceptance therefore does add evidence about correctness on a
 fixed candidate even within the already-accepted pool, but the residual error of unanimous
 acceptance stays at $26.6$--$44.1\%$ at $k{=}3$; for GPT-5.4, three unanimous acceptances
-move the error rate from $45.7\%$ at baseline to $43.4\%$. This is an empirical stability property,
+move the error rate among first-accepted candidates from $43.9\%$ to $43.4\%$
+(the unfiltered generation error rate is $45.7\%$). This is an empirical stability property,
 not a measured information-theoretic ceiling: the latent bound is not identified, and
 these data do not show that further evaluations could not improve discrimination.
 Repeated-evaluation denominators are arm-specific: $n$ counts candidates with a parsed
@@ -1454,8 +1455,8 @@ $96$--$98\%$ correct); the execution-grounded control shows the largest observed
 discrimination gap ($0.961$), accepting $0/9$ incorrect and $149/155$ correct
 candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
 false-acceptance rate loosely constrained. Steelman evaluation
-reduces false acceptance in every family, but the reduction is protocol-specific and
-control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
+reduces false acceptance in every family, but the reduction is not reproduced
+by added deliberation alone: Qwen's neutral re-examination prompt fails to reproduce the
 steelman reduction (a separately-ledgered contrast exposed to run-batch differences
 in both magnitude and direction; candidate-pairing removes composition confounding,
 not batch confounding) at near-equal realized token use
@@ -1653,6 +1654,11 @@ VERDICT: ACCEPT
 VERDICT: REJECT
 \end{quote}
 
+This is the verbatim production self-check wording (the
+prompt constructed by \path{scripts/mbpp_v2_pilot.py}); the reference
+asserts were nevertheless not shown to the evaluator, so ``tests''
+referred to the hidden ground-truth criterion rather than visible evidence.
+
 The MBPP steelman prompt was:
 \begin{quote}\scriptsize\ttfamily\raggedright
 You are a neutral arbiter judging a debate between two expert Python programmers.
@@ -1693,11 +1699,7 @@ VERDICT: ACCEPT
 VERDICT: REJECT
 \end{quote}
 
-This is the verbatim production self-check wording (the
-prompt constructed by \path{scripts/mbpp_v2_pilot.py}); the reference
-asserts were nevertheless not shown to the evaluator, so ``tests''
-referred to the hidden ground-truth criterion rather than visible evidence. The
-wording itself may anchor acceptance toward ``yes'' (a candidate with no visible
+The wording itself may anchor acceptance toward ``yes'' (a candidate with no visible
 tests can appear to satisfy them); no arm varied this wording, so its contribution
 to the absolute $\kappa$ levels is unmeasured, and while the paired arm contrasts
 are difference-based and do not inherit the level anchor, the wording difference

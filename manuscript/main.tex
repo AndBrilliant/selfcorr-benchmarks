@@ -59,7 +59,7 @@ with fixed denominators,
 with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family,
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a
-contrast one opposing discordant pair from losing Holm significance), and
+contrast one reversed discordant pair from losing Holm significance), and
 for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
 Each family also evaluates the other families' candidates: acceptance stays elevated
 for same-family evaluators after evaluator and generator fixed effects, and the effect
@@ -814,7 +814,7 @@ improvement in the reliability of accepted solutions: better internal critique i
 reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
 accepted candidates are only $0.5$--$2.8$ points more likely to be correct than the
 base rate among the same paired candidates (using correct$/$all 947 tasks instead
-shifts every gap by at most $0.6$ points; largest shift $0.55$, GLM steelman). Absolute rates differ from the HumanEval measurement (86--97\%
+shifts every gap by at most $0.6$ points; largest: GLM steelman). Absolute rates differ from the HumanEval measurement (86--97\%
 versus 33--67\% false acceptance); benchmarks, candidate-generating models, and
 incorrect-stratum sizes all differ, so only the ordering transfers descriptively, not
 the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
@@ -933,14 +933,14 @@ Qwen, sits at the self-check level for GPT-5.4, and reaches the steelman level f
 GPT-6-Luna. The paired control-versus-steelman contrast is significant for exactly one
 family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.026$;
 control using $0.99\times$ the steelman tokens): for Qwen, added deliberation
-without adversarial framing accepts incorrect candidates at the self-check level:
-this neutral prompt at near-equal realized token use does not reproduce the steelman reduction,
+without adversarial framing accepts incorrect candidates at the self-check level.
+This neutral prompt at near-equal realized token use does not reproduce the steelman reduction,
 associating Qwen's gain with the steelman protocol rather than deliberation alone. The
 contrast is fragile: reversing one existing discordant pair ($23/7$ to
 $22/8$) would raise the Holm-adjusted $p$ to $0.081$, and completion of the three
 incorrect candidates whose control verdict is missing---their observed steelman
 verdicts are two ACCEPT and one REJECT, so at most two adverse discordances are
-feasible---ranges the Holm-adjusted $p$ from $0.017$ ($24/7$) to $0.100$ ($23/9$), so we
+feasible---puts the Holm-adjusted $p$ between $0.017$ ($24/7$) and $0.100$ ($23/9$), so we
 treat this as the control's sensitivity-flagged result rather than a robust effect. GPT-5.4
 shows the same direction with the computation imbalance reversed---control uses
 $1.44\times$ the steelman tokens yet accepts $90.6\%$ of incorrect candidates versus
@@ -950,7 +950,7 @@ $86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
 re-engagement; that near-equality is not an equivalence result, and a modest
 adversarial-content contribution cannot be excluded. Across families the control
 undercuts the simplest pooled-level ``more tokens did it'' account: in Qwen,
-near-equal realized deliberation ($0.99\times$ the steelman tokens) without the
+near-equal realized deliberation without the
 steelman protocol reproduces the self-check blind spot. The
 control has measured computation, not fully matched computation (token ratios
 $0.65$--$1.44$), and even equal average token use does not establish identical
@@ -1021,8 +1021,8 @@ assumption these data contain no cross-batch retest to test, would let batch acc
 for up to $55\%$
 of the smallest self-check excess (the largest observed cell shift, $5.1$ points,
 against the smallest family excess, $9.2$ points);
-the steelman-side excess is smaller (down to $2.1$ points for GPT-6-Luna), so this
-bound certifies no such statement for it
+the steelman-side excess is smaller (down to $2.1$ points for GPT-6-Luna), so the
+bound does not constrain the steelman contrast
 (\texttt{data/mbpp\_v2/analysis/batch\_sensitivity.json}). Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
 difference is not an explicit-cue artifact, though framing or provider-side differences
@@ -1034,7 +1034,7 @@ measures model-family effects, not provider independence; adding a same-provider
 indicator preserves the same-family contrast (self-check odds ratio $2.06$,
 $p=3.5\times10^{-10}$; steelman odds ratio $1.49$, $p=3.3\times10^{-6}$).
 Cross rates also track error severity: the incorrect candidates of the highest-accuracy
-generator (GLM, whose error stratum is $n_{T=0}=308$ incorrect candidates, $304$
+generator (GLM, whose error stratum numbers $308$ incorrect candidates, $304$
 with a parsed self-check verdict and $299$ fully paired)
 are rejected more by
 every external evaluator than that evaluator's average over the other external generators (GLM self-check
@@ -1144,14 +1144,15 @@ $81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
 breakdown does not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control tests that
 question with a joint-visibility intervention, the assert shown to generation and
-evaluation together: on all 947 tasks, generation accuracy is $56.1\%$ ($531/946$
+evaluation together: across the $947$ tasks attempted, generation accuracy is $56.1\%$ ($531/946$
 candidates with ground truth assigned) with one example
 assert shown to both generator and evaluator, versus $55.9\%$ ($528/944$) on the same tasks in
 production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
 steelman false acceptance is $92.9\%$ versus $90.6\%$. Making one convention visible
 thus moves each aggregate by at most $2.4$ points, enough to reverse the arms'
-false-acceptance ordering, so the joint arm draws no per-arm conclusion and claims
-no equivalence in either direction; because the intervention is joint (generation plus
+false-acceptance ordering, so we draw no per-arm conclusion from the joint arm and
+claim no equivalence in either direction, though generation accuracy itself moves
+only $0.2$ points; because the intervention is joint (generation plus
 evaluation), the control does not exclude an evaluator-only visibility effect on
 the fixed candidates, and an evaluator-only arm on the frozen production candidates
 was not run
@@ -1384,8 +1385,8 @@ acceptance excess in every evaluator under self-check and in all five under
 steelman---an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design
 (though repeated-evaluation retests of the same frozen candidates, under the
-assumption that the cross evaluations' batch shift is no larger in magnitude than
-the largest observed run-to-run shift,
+assumption that the cross evaluations' batch shift is no larger in magnitude, and not
+oppositely signed, than the largest observed run-to-run shift,
 bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict.
@@ -1473,7 +1474,7 @@ Total & 4,655 & 17 & 50 & 13 & 80 excl.\\
 
 Because missing verdicts are excluded rather than imputed, we report extrema of
 the paired FAR
-McNemar contrast over all completions of the missing pairs that respect
+McNemar contrast over every completion of the missing pairs consistent with
 the observed verdicts. GPT-6-Luna's significance is unchanged under any completion of
 its missing pairs (worst-case
 $p_{\mathrm{Holm}}=3.7\times10^{-5}$). Qwen's primary incorrect-stratum contrast has

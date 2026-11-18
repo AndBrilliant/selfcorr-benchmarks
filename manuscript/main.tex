@@ -643,7 +643,11 @@ verdict extraction accepts only a strict terminal \texttt{VERDICT: ACCEPT} or
 (production, repeated evaluation, replication, neutral control, cross-evaluation),
 93,261 API events are preserved, and every parsed verdict reproduces from preserved raw
 text. All generations and evaluations ran at temperature 0; GPT-5.4 used the same
-pinned snapshot as the HumanEval experiment (gpt-5.4-2026-03-05), and model identifiers
+pinned snapshot as the HumanEval experiment (gpt-5.4-2026-03-05, requested via the
+provider alias \texttt{gpt-5.4}; the preserved MBPP records carry the alias rather
+than the snapshot string, Appendix~\ref{app:prompts}, so snapshot identity for the
+MBPP window is asserted from configuration, not directly verifiable from the
+ledgers), and model identifiers
 and request parameters are recorded per event. All 164 archived HumanEval steelman
 prompts contain the no-repair and no-corrected-code instructions, and inspection of all
 code-fenced responses found candidate quotations or illustrative expressions, not a
@@ -1455,12 +1459,12 @@ $96$--$98\%$ correct); the execution-grounded control shows the largest observed
 discrimination gap ($0.961$), accepting $0/9$ incorrect and $149/155$ correct
 candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
 false-acceptance rate loosely constrained. Steelman evaluation
-reduces false acceptance in every family, but the reduction is not reproduced
-by added deliberation alone: Qwen's neutral re-examination prompt fails to reproduce the
-steelman reduction (a separately-ledgered contrast exposed to run-batch differences
-in both magnitude and direction; candidate-pairing removes composition confounding,
-not batch confounding) at near-equal realized token use
-($0.99\times$), while GPT-6-Luna's neutral and steelman rates
+reduces false acceptance in every family; the neutral re-examination control, at
+near-equal realized token use
+($0.99\times$), reproduces the reduction in no family (Qwen $p=0.14$, a separately
+ledgered contrast exposed to run-batch differences in both magnitude and direction;
+candidate-pairing removes composition confounding,
+not batch confounding), and GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
 acceptance excess in every evaluator under both arms: an excess collinear with a production-versus-cross run-batch difference, so

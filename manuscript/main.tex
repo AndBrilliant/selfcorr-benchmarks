@@ -663,7 +663,9 @@ Execution-grounded & \textbf{0/9} & \textbf{0.000 [0.000, 0.299]} & 149/155 & \t
 
 The two internal arms are ordered in false acceptance: $\hat\kappa$ falls from $6/9$
 to $3/9$ while true acceptance rises from $146/155$ to $149/155$; the execution control
-rejects all nine incorrect candidates by construction. The discrimination gaps are
+rejects all nine incorrect candidates (zero observed false acceptances; the verdicts
+are model outputs, not a mechanical relabeling of $T$, as its six false rejections of
+PASS candidates show). The discrimination gaps are
 $\hat\Delta=0.275$, $0.628$, and $0.961$. The oracle arm nevertheless rejects six
 PASS candidates, so its verdicts are not a mechanical relabeling of $T$. All six
 responses are a bare ``NO'' under a verdict-only prompt, so no rationale is preserved;
@@ -1058,9 +1060,10 @@ stratum reports $68\%$ joint acceptance ($n=22$) under the frozen labels and wou
 read $66.7\%$ ($n=21$) under the guard-free reading; every other stratum with at
 least ten paired incorrect candidates is unchanged in its relation to the floor. $\kappa$ is measured under that criterion throughout. A deterministic failure-type
 breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
-renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ crash at runtime
-(\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 runtime
-crashes, $80.2\%$ are \texttt{TypeError} (590/736;
+renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ land in the crash-or-guard-block
+bucket (\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 in that
+bucket, $724$ are genuine runtime crashes and $12$ are pre-execution AST-guard blocks;
+$81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
 \path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). Missing or renamed entry points are therefore negligible, but this
 breakdown does not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control settles that
@@ -1117,9 +1120,9 @@ separation.
 \paragraph{Executable verification.} Unit tests, property-based tests, and simulation
 checks select under computational ground truth; the interpreter does not care how
 confident the generator was. This is the channel instantiated by the execution-grounded
-control in Section~\ref{sec:empirical}; its zero false acceptances there are by
-construction, since the signal derives from the same reference tests that define $T$.
-It still falsely rejects six of the 155 correct candidates, and it marks what a
+control in Section~\ref{sec:empirical}; it shows zero observed false acceptances there,
+although the verdicts remain model outputs (it also falsely rejects six PASS
+candidates), so the guarantee is empirical, not constructive. It marks what a
 direct computational correctness channel buys.
 
 \paragraph{Numerical invariants and retrieval grounding.} Dimensional analysis,
@@ -1275,10 +1278,12 @@ improvements vanished.
 The paper separates three questions that are often conflated: whether a model can
 generate a correct answer, whether it can recognize its own errors under an internal
 evaluation procedure, and how its selection behavior changes when an external
-correctness channel is introduced. On the frozen HumanEval cohort and the five MBPP
+correctness channel is introduced. On the five MBPP
 families, internal evaluation accepts most incorrect candidates even after structured
-critique, and accepted candidates remain only $55$--$70\%$ correct; only the external
-correctness channel sharply separates correct from incorrect. Steelman evaluation
+critique, and accepted candidates remain only $55$--$70\%$ correct (on the smaller
+HumanEval pilot, steelman accepts $3/9$ incorrect but accepted candidates are
+$96$--$98\%$ correct); only the external correctness channel sharply separates correct
+from incorrect. Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
 mechanistically split: Qwen's neutral re-examination prompt fails to reproduce the
 steelman reduction at matched token use, while GPT-6-Luna's neutral and steelman rates

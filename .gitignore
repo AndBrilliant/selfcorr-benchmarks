@@ -1,2 +1,6 @@
-__pycache__/
-*.pyc
+manuscript/*.aux
+manuscript/*.log
+manuscript/*.out
+manuscript/*.pdf
+manuscript/*.bbl
+manuscript/*.blg

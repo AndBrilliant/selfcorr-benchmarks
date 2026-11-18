@@ -39,9 +39,9 @@ an evaluator's judgment can add almost nothing to what is already known about
 correctness: under an explicit shared-blind-spot assumption,
 $I(T;S\mid G)\leq I(T;Z\mid G)$, so the evaluator contributes at most the
 information a shared latent failure variable mediates, a cap that is restrictive
-exactly when the shared variable carries little information about correctness, and
-an observer who treats
-coupled verdicts as independent can become arbitrarily confident in errors. These
+exactly when the shared variable carries little information about correctness.
+Separately, an observer who treats coupled verdicts as independent can become
+arbitrarily confident in errors. These
 are conditional results: they define a failure regime and its measurable
 signatures, not an inevitability. The question they motivate is empirical: do
 real evaluators exhibit the signatures? Each task contributes one immutable
@@ -56,7 +56,7 @@ model families we run self-check and steelman evaluation on
 every stored candidate under a complete-response protocol that preserves
 raw responses before parsing and keeps malformed records visible in the accounting
 with fixed denominators,
-with a neutral re-examination prompt at matched token use as control. Steelman lowers false acceptance in every family,
+with a neutral re-examination control at measured token use. Steelman lowers false acceptance in every family,
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction, and
 for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.

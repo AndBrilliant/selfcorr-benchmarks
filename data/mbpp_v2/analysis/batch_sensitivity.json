@@ -1,0 +1,56 @@
+{
+  "schema": "mbpp-v2-batch-sensitivity/1",
+  "batch_windows": {
+    "production_evals": "2026-11-05T03:03Z..2026-11-05T12:01Z",
+    "repeated_evals": "2026-11-05T13:25Z..2026-11-06T01:28Z",
+    "cross_evals": "2026-11-06T06:10Z..2026-11-16T23:04Z"
+  },
+  "families": {
+    "ds-v4-flash": {
+      "same_family_production_fa_pct": 96.94,
+      "same_family_repeated_fa_pct": 95.35,
+      "off_diagonal_cross_fa_pct": 87.69,
+      "diagonal_excess_pct_points": 9.24,
+      "run_to_run_shift_pct_points": -1.59,
+      "n_incorrect": 392
+    },
+    "glm-5.3-flash": {
+      "same_family_production_fa_pct": 88.82,
+      "same_family_repeated_fa_pct": 86.64,
+      "off_diagonal_cross_fa_pct": 77.46,
+      "diagonal_excess_pct_points": 11.35,
+      "run_to_run_shift_pct_points": -2.17,
+      "n_incorrect": 304
+    },
+    "gpt-5.4": {
+      "same_family_production_fa_pct": 90.07,
+      "same_family_repeated_fa_pct": 90.53,
+      "off_diagonal_cross_fa_pct": 79.72,
+      "diagonal_excess_pct_points": 10.35,
+      "run_to_run_shift_pct_points": 0.46,
+      "n_incorrect": 433
+    },
+    "gpt-6-luna": {
+      "same_family_production_fa_pct": 93.52,
+      "same_family_repeated_fa_pct": 91.44,
+      "off_diagonal_cross_fa_pct": 83.51,
+      "diagonal_excess_pct_points": 10.01,
+      "run_to_run_shift_pct_points": -2.08,
+      "n_incorrect": 432
+    },
+    "qwen38-flash": {
+      "same_family_production_fa_pct": 94.94,
+      "same_family_repeated_fa_pct": 95.18,
+      "off_diagonal_cross_fa_pct": 83.53,
+      "diagonal_excess_pct_points": 11.41,
+      "run_to_run_shift_pct_points": 0.24,
+      "n_incorrect": 415
+    }
+  },
+  "summary": {
+    "max_run_to_run_shift_pct_points": 2.17,
+    "min_diagonal_excess_pct_points": 9.24,
+    "max_fraction_of_excess_attributable_to_batch": 0.2349,
+    "interpretation": "Same-family self-check false acceptance on identical frozen incorrect candidates shifts by at most the stated run-to-run amount between two independent runs; attributing that entire shift to a run-batch factor bounds the batch share of the diagonal excess."
+  }
+}

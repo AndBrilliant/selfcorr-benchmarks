@@ -66,7 +66,8 @@ for same-family evaluators after evaluator and generator fixed effects, and the 
 survives a same-provider control, though the same-family indicator is collinear with a
 production-versus-cross run-batch difference and the two cannot be separated in this
 design (a repeated-evaluation retest, under the assumption that the cross evaluations'
-batch shift is no larger than the observed same-family run-to-run shift, bounds the
+batch shift is no larger and not oppositely signed than the observed same-family
+run-to-run shift, bounds the
 batch share of the excess at $24\%$). A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
@@ -1001,8 +1002,9 @@ two cannot be separated in this design; timestamps per record are preserved in b
 ledgers. The batch factor's size is nevertheless bounded from existing data, under one
 stated assumption: the repeated-evaluation ledger re-evaluates the same frozen
 incorrect candidates with the same family in a separate run, and the same-family
-self-check false-acceptance rate
-shifts by at most $2.2$ percentage points per family between runs, versus a diagonal
+self-check false-acceptance rate, computed over every incorrect candidate with a
+complete self-check verdict (per-family denominators in the artifact), shifts by at
+most $2.2$ percentage points per family between runs, versus a diagonal
 excess of $9.2$--$11.4$ points. Treating that observed run-to-run shift as the largest
 plausible batch component of the excess---equivalently, assuming the off-diagonal
 cross evaluations' batch shift is no larger and not oppositely signed, a
@@ -1359,7 +1361,8 @@ acceptance excess in every evaluator under self-check and in all five under
 steelman---an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design
 (though a repeated-evaluation retest of the same frozen candidates, assuming the cross
-evaluations' batch shift is no larger than the observed same-family run-to-run shift,
+evaluations' batch shift is no larger and not oppositely signed than the observed
+same-family run-to-run shift,
 bounds the batch share of the excess at $24\%$). Repeated unanimous acceptance carries $27$--$44\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict.

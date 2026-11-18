@@ -801,17 +801,8 @@ significance. An overall-verdict-accuracy McNemar contrast (a verdict scored cor
 matches ground truth, pooled over correct and incorrect paired candidates) is
 significant in no family (discordants where steelman fixes a self-check error versus
 introduces one: GPT-5.4 $39/42$, DeepSeek $24/14$, GLM $37/27$, Qwen $27/19$,
-GPT-6-Luna $36/23$; all $p>0.11$), and no arm-by-correctness interaction reaches
-significance either
-(Woolf homogeneity of odds ratios on the marginal stratum tables: arm verdicts
-within a stratum are candidate-paired and are treated as independent, so the test
-is descriptive; $p=0.34$--$0.76$,
-\path{data/mbpp_v2/analysis/homogeneity_check.json}; on the additive scale the
-interaction is the discrimination-gap change, whose GPT-6-Luna interval below excludes zero),
-though that test is unpowered for
-establishing the absence of an interaction (the homogeneity test and the discrimination
-intervals below estimate different quantities: equality of the arm effect across
-correctness strata versus the combined $\tau-\kappa$ contrast). The paired discrimination-gap change has a
+GPT-6-Luna $36/23$; all $p>0.11$). The arm-by-correctness interaction is reported
+directly on the additive scale as the paired discrimination-gap change; its
 95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
 $[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
 discrimination improvement's interval excludes zero for GPT-6-Luna only; these intervals are

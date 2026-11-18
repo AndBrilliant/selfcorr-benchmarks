@@ -61,8 +61,9 @@ with a neutral re-examination control at measured token use. Steelman lowers fal
 is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
 incorrect stratum),
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
-($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a
-contrast one reversed discordant pair from losing Holm significance), and
+($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a separately-ledgered
+contrast, batch-exposed in magnitude with significance carried by the within-ledger
+paired discordance, one reversed discordant pair from losing Holm significance), and
 for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
 Each family also evaluates the other families' candidates: acceptance stays elevated
 for same-family evaluators after evaluator and generator fixed effects, and the effect
@@ -942,8 +943,13 @@ family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.
 control using $0.99\times$ the steelman tokens): for Qwen, added deliberation
 without adversarial framing accepts incorrect candidates at the self-check level.
 This neutral prompt at near-equal realized token use does not reproduce the steelman reduction,
-associating Qwen's gain with the steelman protocol rather than deliberation alone. The
-contrast is fragile: reversing one existing discordant pair ($23/7$ to
+associating Qwen's gain with the steelman protocol rather than deliberation alone. That
+association is batch-exposed: the control ledger ran separately from production, and the
+largest run-to-run false-acceptance shift measured in this design ($5.1$ points, from the
+repeated-evaluation retests) exceeds the $3.9$-point control-versus-production-steelman
+marginal gap; the within-ledger paired discordance ($23/7$) is batch-invariant and carries
+the significance, so we read the direction as supported and the magnitude as bounded by
+batch drift. The contrast is fragile: reversing one existing discordant pair ($23/7$ to
 $22/8$) would raise the Holm-adjusted $p$ to $0.081$, and completion of the three
 incorrect candidates whose control verdict is missing---their observed steelman
 verdicts are two ACCEPT and one REJECT, so at most two adverse discordances are
@@ -1400,7 +1406,8 @@ candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
 false-acceptance rate loosely constrained. Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
 control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
-steelman reduction (a sensitivity-flagged contrast) at near-equal realized token use
+steelman reduction (a sensitivity-flagged, separately-ledgered contrast: batch-exposed in
+magnitude, with significance carried by the within-ledger paired discordance) at near-equal realized token use
 ($0.99\times$), while GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
@@ -1412,7 +1419,10 @@ assumption that the cross evaluations' batch shift is no larger in magnitude, an
 oppositely signed, than the largest observed run-to-run shift,
 bound the batch share of the smallest self-check excess at $55\%$). Repeated unanimous acceptance carries $26.6$--$44.1\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
-rates alone predict.
+rates alone predict; the moderation analysis adds small but significant positive
+association beyond the marginals on the paired incorrect stratum (crude $\phi$
+$0.15$--$0.59$, Fisher exact $p<0.03$ in every family), so the marginals carry
+most, not all, of the joint rate.
 
 The theory is conditional and concerns average information: under joint conditional
 independence, $k$ rounds of self-critique provide mutual information bounded by what
@@ -1564,6 +1574,10 @@ behind an alias may be updated by the provider between runs, so the
 repeated-evaluation retests that bound the run-batch component of the same-family
 excess double as the design's control for that drift (provider-side version
 changes are a batch shift in exactly the sense the bound prices).
+Per-call provider routing identifiers were recorded in every ledger's event log and
+resolve to one provider route per family; the GPT-5.4 records carry the alias itself
+(\texttt{gpt-5.4}, provider-prefixed in the cross ledger) rather than the pinned
+snapshot string, and the HumanEval snapshot identifier is recorded verbatim.
 
 The MBPP self-check prompt was:
 \begin{quote}\scriptsize\ttfamily\raggedright

@@ -65,7 +65,9 @@ Each family also evaluates the other families' candidates: acceptance stays elev
 for same-family evaluators after evaluator and generator fixed effects, and the effect
 survives a same-provider control, though the same-family indicator is collinear with a
 production-versus-cross run-batch difference and the two cannot be separated in this
-design (a repeated-evaluation retest bounds the batch share of the excess at $24\%$). A severity audit of 1,987 incorrect
+design (a repeated-evaluation retest, under the assumption that the cross evaluations'
+batch shift is no larger than the observed same-family run-to-run shift, bounds the
+batch share of the excess at $24\%$). A severity audit of 1,987 incorrect
 candidates finds $84.4\%$ fail every reference assert. Across all
 1,987 incorrect candidates, $62.8\%$ ran and failed on values, $37.0\%$ fell in the
 crash-or-guard-block bucket, and $0.2\%$ had a missing or renamed entry point.
@@ -423,11 +425,13 @@ Suppose a selector satisfies
 \Pr(A = 1 \mid T = 0) \leq 1 - \epsilon,\qquad
 \Pr(A = 1 \mid T = 1) \geq \delta
 \end{equation*}
-for some $\delta > 1 - \epsilon > 0$. Then acceptance by that selector provides
+for some $\delta > 1 - \epsilon > 0$. Then acceptance by that selector provides at
+least
 \begin{equation}
 \log_2 \frac{\delta}{1 - \epsilon} > 0
 \end{equation}
-bits of evidence about correctness.
+bits of evidence about correctness (the likelihood ratio is bounded below; it can be
+larger).
 \end{Proposition}
 
 \begin{proof}
@@ -928,10 +932,10 @@ family, Qwen ($p=0.0052$; Holm-adjusted across the five control contrasts, $p=0.
 control using $0.99\times$ the steelman tokens): for Qwen, matched deliberation
 without adversarial framing accepts incorrect candidates at the self-check level:
 this neutral prompt at matched token use does not reproduce the steelman reduction,
-localizing Qwen's gain to the steelman protocol rather than deliberation alone. The
+associating Qwen's gain with the steelman protocol rather than deliberation alone. The
 contrast is fragile: reversing one existing discordant pair ($23/7$ to
 $22/8$) would raise the Holm-adjusted $p$ to $0.081$, and extreme imputation of the three incorrect candidates
-missing a control verdict bounds the Holm-adjusted $p$ to $0.007$--$0.175$, so we
+missing a control verdict bounds the Holm-adjusted $p$ to $0.026$--$0.175$, so we
 treat this as the control's sensitivity-flagged result rather than a robust effect. GPT-5.4
 shows the same direction with the computation imbalance reversed---control uses
 $1.44\times$ the steelman tokens yet accepts $90.6\%$ of incorrect candidates versus
@@ -940,7 +944,7 @@ steelman accept incorrect candidates at essentially the same rate ($85.8\%$ vers
 $86.7\%$, both far below self-check $93.5\%$), consistent with content-neutral
 re-engagement; that near-equality is not an equivalence result, and a modest
 adversarial-content contribution cannot be excluded. Across families the control
-falsifies the simplest pooled-level ``more tokens did it'' account: equal or greater deliberation
+undercuts the simplest pooled-level ``more tokens did it'' account: equal or greater deliberation
 reproduces the self-check blind spot in the family with the clearest steelman gain. The
 control has measured computation, not fully matched computation (token ratios
 $0.65$--$1.44$), and even equal average token use does not establish identical
@@ -994,12 +998,16 @@ evaluator remains significant after Holm adjustment; under steelman all five do
 off-diagonal cells from the cross-evaluation ledger (run 2026-11-06/07), so the
 same-family indicator is collinear with a production-versus-cross batch factor and the
 two cannot be separated in this design; timestamps per record are preserved in both
-ledgers. The batch factor's size is nevertheless bounded from existing data: the
-repeated-evaluation ledger re-evaluates the same frozen incorrect candidates with the
-same family in a separate run, and the same-family self-check false-acceptance rate
+ledgers. The batch factor's size is nevertheless bounded from existing data, under one
+stated assumption: the repeated-evaluation ledger re-evaluates the same frozen
+incorrect candidates with the same family in a separate run, and the same-family
+self-check false-acceptance rate
 shifts by at most $2.2$ percentage points per family between runs, versus a diagonal
-excess of $9.2$--$11.4$ points, so attributing the entire run-to-run shift to batch
-accounts for at most $24\%$ of the excess
+excess of $9.2$--$11.4$ points. Treating that observed run-to-run shift as the largest
+plausible batch component of the excess---equivalently, assuming the off-diagonal
+cross evaluations' batch shift is no larger and not oppositely signed, a
+transportability assumption no cross-evaluation batch retest can test---attributes at
+most $24\%$ of the excess to batch
 (\texttt{data/mbpp\_v2/analysis/batch\_sensitivity.json}). Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
 difference is not a framing artifact; self-preference through familiarity with one's
@@ -1340,7 +1348,8 @@ families, internal evaluation accepts most incorrect candidates even after struc
 critique, and accepted candidates remain only $55$--$70\%$ correct (on the smaller
 HumanEval pilot, steelman accepts $3/9$ incorrect but accepted candidates are
 $96$--$98\%$ correct); only the external correctness channel sharply separates correct
-from incorrect. Steelman evaluation
+from incorrect (zero false acceptances in nine cases; the Wilson 95\% upper bound
+$0.30$ leaves that small stratum's rate loosely constrained). Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
 control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
 steelman reduction (a sensitivity-flagged contrast) at matched token use, while GPT-6-Luna's neutral and steelman rates
@@ -1349,8 +1358,9 @@ families' incorrect candidates, with a same-family
 acceptance excess in every evaluator under self-check and in all five under
 steelman---an excess collinear with a production-versus-cross run-batch difference, so
 the same-family contrast and the batch factor cannot be separated in this design
-(though a repeated-evaluation retest of the same frozen candidates bounds the batch
-share of the excess at $24\%$). Repeated unanimous acceptance carries $27$--$44\%$ residual
+(though a repeated-evaluation retest of the same frozen candidates, assuming the cross
+evaluations' batch shift is no larger than the observed same-family run-to-run shift,
+bounds the batch share of the excess at $24\%$). Repeated unanimous acceptance carries $27$--$44\%$ residual
 error at $k{=}3$, and joint acceptance between the arms is largely what the marginal
 rates alone predict.
 
@@ -1439,12 +1449,15 @@ Because missing verdicts are excluded rather than imputed, the paired FAR McNema
 contrast is bounded under the most adversarial extreme imputation (every missing pair
 assigned to maximize discordance against steelman). GPT-6-Luna's adjusted result is
 unchanged under any imputation of its missing pairs (worst-case
-$p_{\mathrm{Holm}}=3.7\times10^{-5}$). Qwen's survives unless all three of its missing
-$T{=}0$ pairs are simultaneously maximally adversarial: with complete-pair discordance
-$22/5$ (self-check-accept/steelman-reject versus the reverse), the imputed
-discordances $22/6$, $22/7$, and $22/8$ give $p_{\mathrm{Holm}}=0.0186$, $0.0407$, and
-$0.0806$ respectively (Holm rank 5 of 5, multiplier 5), so any imputation with at most
-two adversarial pairs keeps $p_{\mathrm{Holm}}\le0.0407$. The three non-significant families remain
+$p_{\mathrm{Holm}}=3.7\times10^{-5}$). Qwen's primary incorrect-stratum contrast has
+complete-pair discordance $26/8$
+(self-check-accept/steelman-reject versus the reverse; the abstract's
+$p_{\mathrm{Holm}}=0.0117$ is this McNemar value at Holm rank 4 of 5). The three
+incorrect candidates missing a paired verdict, assigned maximally adversely, give
+imputed discordances $26/9$, $26/10$, and $26/11$ with
+$p_{\mathrm{Holm}}=0.0240$, $0.0453$, and $0.0803$ respectively, so any imputation
+with at most two adversarial pairs keeps $p_{\mathrm{Holm}}\le0.0453$. The three
+non-significant families remain
 non-significant under every imputation.
 
 \section{A Predictive Interpretation}

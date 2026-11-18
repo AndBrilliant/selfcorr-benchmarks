@@ -100,9 +100,13 @@ def main():
             "interpretation": (
                 "Same-family self-check false acceptance on identical frozen "
                 "incorrect candidates shifts by at most the stated run-to-run "
-                "amount between two independent runs; attributing that entire "
-                "shift to a run-batch factor bounds the batch share of the "
-                "diagonal excess."
+                "amount between two independent runs. Treating that shift as the "
+                "largest plausible batch component of the diagonal excess assumes "
+                "the off-diagonal (cross-evaluation) cells' batch shift is no "
+                "larger and not oppositely signed -- a transportability "
+                "assumption that no cross-evaluation batch retest in these data "
+                "can test. Under that assumption the batch share of the excess is "
+                "bounded as stated."
             ),
         },
     }

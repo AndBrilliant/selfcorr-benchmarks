@@ -54,11 +54,11 @@ three unanimous acceptances still leave $26.6$--$44.1\%$ residual error.
 Structured steelman evaluation in a clean context lowers false acceptance in
 every family by $1.7$--$6.7$ points (Holm-significant for Qwen and
 GPT-6-Luna) at a true-acceptance cost of at most $3.2$ points; the break-even is
-roughly $1.6$--$2.4$ regenerations per avoided false acceptance, a small integer
+at most $2.4$ regenerations per avoided false acceptance, a small integer
 against the cost of a shipped defect.
 Cross-evaluation shows permissiveness is largely evaluator-general, with a
-same-family excess whose batch share is bounded by repeated-evaluation
-retests. A severity audit of 1,987 incorrect candidates finds $84.4\%$ fail
+same-family excess whose batch share a repeated-evaluation sensitivity analysis
+can bound only under a transportability assumption. A severity audit of 1,987 incorrect candidates finds $84.4\%$ fail
 every reference assert. Better internal critique is not validation; the
 remedy is an independent correctness channel.
 \end{abstract}
@@ -828,7 +828,7 @@ with $\pi$ the correct fraction among paired candidates and $\Delta\kappa$,
 $\Delta\tau$ the paired drops in false and true acceptance. The table's rounded
 rates put $c^{*}$ between $1.0$ (DeepSeek, GLM, where $\Delta\tau=0$) and $2.4$
 (GPT-5.4), at roughly $1.6$ for Qwen and GPT-6-Luna. The break-even is therefore
-a small integer, not one: my earlier framing understates the cost side. It
+a small integer, not one. It
 remains favorable in any deployment where a shipped defect costs more than about
 two regeneration calls, which is the usual case.
 

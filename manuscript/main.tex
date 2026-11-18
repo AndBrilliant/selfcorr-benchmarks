@@ -796,8 +796,9 @@ $55.0\%\rightarrow56.0\%$, GPT-5.4 flat at $56.3\%\rightarrow56.2\%$). A statist
 detectable reduction in false acceptance therefore does not translate into a large
 improvement in the reliability of accepted solutions: better internal critique is not
 reliable validation. Acceptance itself buys almost nothing over the unfiltered pool:
-accepted candidates are only $0.8$--$3.2$ points more likely to be correct than the
-family's base generation accuracy (correct$/$all 947 tasks). Absolute rates differ from the HumanEval measurement (86--97\%
+accepted candidates are only $0.5$--$2.8$ points more likely to be correct than the
+base rate among the same paired candidates (using correct$/$all 947 tasks instead
+shifts every gap by at most $0.2$ points). Absolute rates differ from the HumanEval measurement (86--97\%
 versus 33--67\% false acceptance); benchmarks, candidate-generating models, and
 incorrect-stratum sizes all differ, so only the ordering transfers descriptively, not
 the level. In a full-population audit of all 1,987 incorrect candidates, 84.4\% failed
@@ -896,9 +897,9 @@ $68\%$ in every stratum with at least ten paired incorrect candidates
 one-observation stratum at $0\%$). Here $\phi$ is the self-check--steelman verdict association
 on the incorrect stratum, not a ground-truth effect. One moderator partially attenuates it: in the text-processing
 stratum $\phi$ drops to $0.07$--$0.30$ versus $0.42$--$0.46$ in the remaining
-candidates for three families. This rules out the five registered covariate
-explanations, not every candidate-difficulty account, and it is associational rather
-than a conditional-independence test.
+candidates for three families. This rules out the five registered covariates, one at a
+time, as explanations of the association, not every candidate-difficulty account, and
+it is associational rather than a conditional-independence test.
 
 \subsection{Mechanism: Adversarial Content and Self-Leniency}
 \label{sec:mechanism}
@@ -1090,7 +1091,8 @@ $81.5\%$ of the genuine crashes are \texttt{TypeError} (590/724;
 \path{data/mbpp_v2/analysis/crash_exception_breakdown.json}). Missing or renamed entry points are therefore negligible, but this
 breakdown does not distinguish genuine wrong answers from defensible alternative
 readings of underspecified prose; the one-assert-visible Qwen control tests that
-question directly: on all 947 tasks, generation accuracy is $56.1\%$ with one example
+question with a joint-visibility intervention, the assert shown to generation and
+evaluation together: on all 947 tasks, generation accuracy is $56.1\%$ with one example
 assert shown to both generator and evaluator, versus $55.9\%$ on the same tasks in
 production, while self-check false acceptance is $92.5\%$ versus $94.9\%$ and
 steelman false acceptance is $92.9\%$ versus $90.6\%$. Making one convention visible
@@ -1156,11 +1158,14 @@ conservation laws, and sanity bounds select under physical ground truth; citatio
 quote verification against a fixed corpus selects under documentary ground truth.
 
 \paragraph{Independent critics.} Models with different training data, architectures, or
-optimization objectives have partially independent failure modes. The cross-evaluation
-matrix of Section~\ref{sec:mechanism} measures exactly this channel: external
-evaluators reject errors the generating family accepted at $2.5$--$7.4$ to one,
-but their absolute false-acceptance rates remain high, so independence is partial, not
-complete.
+optimization objectives plausibly have partially independent failure modes. The
+cross-evaluation matrix of Section~\ref{sec:mechanism} measures the same-family excess
+on this channel, not cross-family verdict dependence: external
+evaluators reject errors the generating family accepted at $2.5$--$7.4$ to one---an
+asymmetry that partly reflects differing marginal false-acceptance rates---and their
+absolute false-acceptance rates remain high; quantifying cross-family independence
+itself would require comparing observed joint acceptance against the product of the
+matched marginals, a comparison this study does not run.
 
 \paragraph{Fresh-context evaluation as an engineering heuristic.} The same model under
 fresh context removes the generation trace but not the shared weights and training

@@ -62,8 +62,9 @@ is non-significant for every family, $p=0.12$--$0.82$, so the gain lives in the
 incorrect stratum),
 surviving Holm adjustment for Qwen ($p=0.0117$) and GPT-6-Luna
 ($p=2.1\times10^{-6}$); the neutral prompt does not reproduce Qwen's reduction (a separately-ledgered
-contrast, batch-exposed in magnitude with significance carried by the within-ledger
-paired discordance, one reversed discordant pair from losing Holm significance), and
+contrast exposed to run-batch differences in both magnitude and direction:
+candidate-pairing removes composition confounding, not batch confounding, and one
+reversed discordant pair is enough to lose Holm significance), and
 for GPT-6-Luna the two prompts accept incorrect candidates at nearly the same rate.
 Each family also evaluates the other families' candidates: acceptance stays elevated
 for same-family evaluators after evaluator and generator fixed effects, and the effect
@@ -720,7 +721,9 @@ the nine-error and 155-correct strata, seed 20261104, no
 pseudocounts~\cite{efron1979bootstrap}; 100 of the 4,000 resamples (empirical mass
 $2.50\%$; the exact bootstrap mass at $+\infty$ is $(6/9)^9-(1/9)^9=2.60\%$) yield
 infinite $\Delta\hat E$, so the inverse-ECDF upper endpoint is the largest finite
-draw in this seeded run)
+draw in this seeded run; the exact, seed-free $97.5$th percentile of the bootstrap
+resampling distribution is $+\infty$ under this mass, so the finite upper endpoint
+quoted below is a property of the seeded Monte Carlo realization, not an exact bound)
 gives steelman-minus-self-check contrasts of
 $\Delta\hat\kappa=-0.333$ $[-0.889,0.222]$, $\Delta\hat\tau=+0.019$
 $[-0.013,0.052]$, and $\Delta\hat E=+1.03$ bits $[-0.71,3.26]$: the nominal,
@@ -806,7 +809,13 @@ correctness strata versus the combined $\tau-\kappa$ contrast). The paired discr
 95\% bootstrap interval of $[-4.2,+3.5]$ points (GPT-5.4), $[-0.3,+5.4]$ (DeepSeek),
 $[-1.1,+7.9]$ (GLM), $[-0.6,+5.5]$ (Qwen), and $[+0.4,+7.0]$ (GPT-6-Luna), so the
 discrimination improvement's interval excludes zero for GPT-6-Luna only; these intervals are
-per-family and unadjusted. True-acceptance cost is small and family-dependent: at most
+per-family and unadjusted. No global family-wise error rate is claimed across the
+secondary analyses: the bootstrap discrimination intervals are per-family and
+unadjusted, the control contrasts are Holm-adjusted only within their own
+five-family set, and the moderator, failure-type, and cross-evaluation tests carry
+per-set or no correction; the primary five-family Holm adjustment on the paired
+incorrect-stratum contrasts is the only family-wise-adjusted inference, and every
+conclusion in this paper rests on that set. True-acceptance cost is small and family-dependent: at most
 3.2 points (GPT-6-Luna $96.5\%\rightarrow93.3\%$), and zero for DeepSeek and GLM.
 
 The practical reliability of accepted candidates moves correspondingly little: among
@@ -914,9 +923,15 @@ before any stratified statistic was computed
 (the specification file \path{scripts/mbpp_v2_moderator_spec.md} in the pinned
 repository commit is byte-identical to the registered version). Under the registered
 rule the association is persistent in all
-five families: the stratified $\phi$ is within $0.03$ of the crude value for
-every moderator (crude range $0.15$--$0.59$), and joint acceptance stays at or above
-$68\%$ in every stratum with at least ten paired incorrect candidates
+five families, carried by at least one moderator per family: the stratified $\phi$ is
+within $0.03$ of the crude value for every moderator in every family (crude range
+$0.15$--$0.59$; registered tolerance $0.05$). The rule's joint-acceptance floor is
+met by at least four of the five moderators in every family; the code-length
+moderator is mixed in two of them, Qwen (a $22$-candidate high-length stratum at
+$68.2\%$ joint acceptance, below the registered $70\%$ floor) and GPT-5.4 (a
+single-observation stratum at $0\%$), without changing any family verdict.
+Descriptively, joint acceptance stays at or above $68\%$ in every stratum with at
+least ten paired incorrect candidates
 (smallest qualifying stratum $n=13$ at $77\%$; the lone exception is a
 one-observation stratum at $0\%$). Here $\phi$ is the self-check--steelman verdict association
 on the incorrect stratum, not a ground-truth effect. One moderator partially attenuates it: in the text-processing
@@ -947,9 +962,14 @@ associating Qwen's gain with the steelman protocol rather than deliberation alon
 association is batch-exposed: the control ledger ran separately from production, and the
 largest run-to-run false-acceptance shift measured in this design ($5.1$ points, from the
 repeated-evaluation retests) exceeds the $3.9$-point control-versus-production-steelman
-marginal gap; the within-ledger paired discordance ($23/7$) is batch-invariant and carries
-the significance, so we read the direction as supported and the magnitude as bounded by
-batch drift. The contrast is fragile: reversing one existing discordant pair ($23/7$ to
+marginal gap. The paired discordance ($23/7$) is candidate-matched but not batch-matched:
+pairing removes candidate-composition confounding, while a batch shift between the two
+runs can move the discordance in either direction, so the contrast compares
+prompt-and-batch combinations and cannot by itself attribute its direction to the
+prompt; an interleaved rerun of both prompts within one batch could separate the two.
+We report the Qwen control as a batch-exposed contrast consistent with the protocol
+mattering, not as evidence that deliberation alone fails to reproduce the reduction.
+The contrast is also fragile: reversing one existing discordant pair ($23/7$ to
 $22/8$) would raise the Holm-adjusted $p$ to $0.081$, and completion of the three
 incorrect candidates whose control verdict is missing---their observed steelman
 verdicts are two ACCEPT and one REJECT, so at most two adverse discordances are
@@ -1007,7 +1027,10 @@ $2.5$--$7.4$ to one toward external evaluators rejecting errors that the generat
 family accepted, versus the reverse, and every task-clustered
 paired-bootstrap interval is above zero. A crossed logistic model with categorical
 evaluator and generator effects and task-clustered sandwich standard errors estimates
-this same-family contrast alongside each evaluator's general permissiveness: same-family
+this same-family contrast alongside each evaluator's general permissiveness
+(descriptively, on run-confounded data: the diagonal and off-diagonal cells come
+from different run batches, so the contrast aggregates batch with family effects):
+same-family
 acceptance of incorrect candidates remains elevated under self-check
 ($\beta=1.078$, odds ratio $2.94$, $p=1.2\times10^{-36}$) and steelman
 ($\beta=0.654$, odds ratio $1.92$, $p=9.5\times10^{-23}$). Under self-check every
@@ -1035,7 +1058,8 @@ for up to $55\%$
 of the smallest self-check excess (the largest observed cell shift, $5.1$ points,
 against the smallest family excess, $9.2$ points);
 the steelman-side excess is smaller (down to $2.1$ points for GPT-6-Luna), so the
-bound does not constrain the steelman contrast
+bound does not constrain the steelman contrast, which for the same reason cannot be
+read as an evaluator-leniency effect either
 (\texttt{data/mbpp\_v2/analysis/batch\_sensitivity.json}). Prompts and decoding
 are identical across self- and cross-evaluation and never disclose authorship, so the
 difference is not an explicit-cue artifact, though framing or provider-side differences
@@ -1052,7 +1076,9 @@ with a parsed self-check verdict and $299$ fully paired)
 are rejected more by
 every external evaluator than that evaluator's average over the other external generators (GLM self-check
 cross false acceptance $73.2$--$82.5\%$). The blind spot is therefore mostly an
-evaluator property with a same-family excess on top (with a run-batch component bounded
+evaluator property with a same-family excess on top, where the excess is a
+family-plus-batch contrast: the off-diagonal cells sit in cross-evaluation batches,
+so an evaluator shift applied to those batches can masquerade as leniency (with a run-batch component bounded
 at up to $55\%$ of the self-check excess under the stated transportability assumption).
 
 \begin{table}[!t]
@@ -1145,13 +1171,14 @@ more than $0.6$ percentage points under either labeling (the within-crash
 TypeError share, a ratio of two moved counts, shifts by at most $0.7$ points).
 The moderator analysis
 has exactly one boundary stratum exposed to this relabeling: its Qwen code-length-high
-stratum reports $68\%$ joint acceptance ($n=22$) under the frozen labels and would
+stratum reports $68.2\%$ joint acceptance ($n=22$) under the frozen labels and would
 read $66.7\%$ ($n=21$) under the guard-free reading; every other stratum with at
 least ten paired incorrect candidates is unchanged in its relation to the floor,
 and no family's registered conclusion changes under the guard-free reading
-(the code-length moderator fails the registered rule for Qwen under the frozen
-labels already, so that family's persistence is carried by the other four
-moderators). $\kappa$ is measured under that criterion throughout. A deterministic failure-type
+(the code-length moderator fails the registered rule under the frozen
+labels in two families, Qwen (the $22$-candidate high-length stratum at $68.2\%$)
+and GPT-5.4 (the single-observation stratum at $0\%$), so those families'
+persistence is carried by their other moderators). $\kappa$ is measured under that criterion throughout. A deterministic failure-type
 breakdown of the 1,987 incorrect candidates finds only $0.2\%$ with a missing or
 renamed entry point; $62.8\%$ run and fail on values, and $37.0\%$ land in the crash-or-guard-block
 bucket (\path{data/mbpp_v2/analysis/failure_type_breakdown.json}). Of the 736 in that
@@ -1406,8 +1433,9 @@ candidates, with the Wilson 95\% upper bound $0.30$ leaving that small stratum's
 false-acceptance rate loosely constrained. Steelman evaluation
 reduces false acceptance in every family, but the reduction is protocol-specific and
 control-dependent: Qwen's neutral re-examination prompt fails to reproduce the
-steelman reduction (a sensitivity-flagged, separately-ledgered contrast: batch-exposed in
-magnitude, with significance carried by the within-ledger paired discordance) at near-equal realized token use
+steelman reduction (a separately-ledgered contrast exposed to run-batch differences
+in both magnitude and direction; candidate-pairing removes composition confounding,
+not batch confounding) at near-equal realized token use
 ($0.99\times$), while GPT-6-Luna's neutral and steelman rates
 are nearly equal (not an equivalence result). The cross-evaluation matrix shows the permissiveness extends to other
 families' incorrect candidates, with a same-family
@@ -1572,7 +1600,12 @@ snapshot and reasoning setting are given in Section~\ref{sec:empirical}.
 Four of these five identifiers are unpinned provider router aliases: the model
 behind an alias may be updated by the provider between runs, so the
 repeated-evaluation retests that bound the run-batch component of the same-family
-excess double as the design's control for that drift (provider-side version
+excess double as the design's control for that drift, within their own timing
+window: the retests sit at the end of the production period and bound drift across
+the runs they bracket, but they do not observe the production window directly, so a
+provider-side version change between a family's production ledger and its later
+cross/retest ledgers is priced by the retest-versus-production shifts only insofar
+as those shifts carry it (provider-side version
 changes are a batch shift in exactly the sense the bound prices).
 Per-call provider routing identifiers were recorded in every ledger's event log and
 resolve to one provider route per family; the GPT-5.4 records carry the alias itself
@@ -1640,6 +1673,10 @@ This is the verbatim production self-check wording (the
 prompt constructed by \path{scripts/mbpp_v2_pilot.py}); the reference
 asserts were nevertheless not shown to the evaluator, so ``tests''
 referred to the hidden ground-truth criterion rather than visible evidence. The
+wording itself may anchor acceptance toward ``yes'' (a candidate with no visible
+tests can appear to satisfy them); no arm varied this wording, so its contribution
+to the absolute $\kappa$ levels is unmeasured, though the paired arm contrasts are
+difference-based and less exposed. The
 one-assert-visible control adds one example assert to both generator and
 evaluator. The cross-evaluation arms used the same self-check and steelman
 prompts verbatim for every evaluator--generator pair.

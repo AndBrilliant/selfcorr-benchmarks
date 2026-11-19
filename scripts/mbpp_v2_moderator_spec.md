@@ -1,9 +1,8 @@
-# Pre-registered moderator specification — MBPP arm-association stratification (Tier 0)
+# Moderator analysis specification — MBPP arm-association stratification (Tier 0)
 
-Registration date: 2026-11-05.
-Registered BEFORE any stratified outcome was computed. The production ledger
-(commit 91603a6) and the arm-level association statistics were public; no
-moderator-conditioned statistic existed at registration time.
+Specified in writing before the stratified statistics were computed. The
+production ledger and the arm-level association statistics were public; no
+moderator-conditioned statistic existed before this specification was written.
 
 ## Question
 
@@ -40,7 +39,7 @@ verdicts, or evaluator text)
 5. `concept` — `text` if the candidate code imports `re` or calls any str
    method; else `other`. Deterministic keyword scan of the frozen code.
 
-## Pre-registered decision rule
+## Decision rule
 
 Let phi_crude be the per-family phi on the primary population, and phi_MH the
 Mantel–Haenszel common phi adjusted for the moderator strata (per moderator,
@@ -58,12 +57,12 @@ per family).
 Multiplicity: the decision rule is evaluated per moderator with the family as
 the unit; no p-value is the sole arbiter. Per-stratum Fisher p-values are
 reported descriptively. No post-hoc moderators will be added to this spec;
-any new moderator requires a new registration commit before its outcomes are
-examined.
+any new moderator requires a new specification written before its outcomes
+are examined.
 
 ## Data
 
-- Ledger: data/mbpp_v2/production (immutable, manifest 91603a6)
+- Ledger: data/mbpp_v2/production (immutable, manifest.sha256)
 - Candidates: candidate_records.jsonl (frozen code)
 - Analysis script: scripts/mbpp_v2_moderator_analysis.py
-- Outputs: data/mbpp_v2/moderator_analysis/ (json, txt, tex, manifest)
+- Outputs: data/mbpp_v2/moderator_analysis/ (json, txt, manifest)

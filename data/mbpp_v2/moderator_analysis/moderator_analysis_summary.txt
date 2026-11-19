@@ -1,4 +1,4 @@
-Tier 0 moderator-stratified arm association (pre-registered)
+Tier 0 moderator-stratified arm association (exploratory)
 ==============================================================
 
 == gpt-5.4 (paired incorrect n=427)

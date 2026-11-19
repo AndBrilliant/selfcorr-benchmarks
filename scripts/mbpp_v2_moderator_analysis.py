@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Tier 0 moderator-stratified arm-association analysis (pre-registered).
+"""Tier 0 moderator-stratified arm-association analysis (exploratory).
 
 Implements scripts/mbpp_v2_moderator_spec.md. Reads the immutable production
 ledger; computes per-family phi between self-check and steelman verdicts on
-the paired incorrect stratum, crude and stratified by each pre-registered
+the paired incorrect stratum, crude and stratified by each specified
 moderator, with per-stratum Fisher exact p-values and joint-acceptance rates.
 Writes json/txt/tex plus a manifest. No model calls; fully deterministic.
 """
@@ -139,9 +139,9 @@ def main() -> int:
     pw_t = tertiles([v["prompt_words"] for v in mv.values()])
     cl_t = tertiles([v["code_lines"] for v in mv.values()])
 
-    result = {"spec": "scripts/mbpp_v2_moderator_spec.md", "registration_commit": "0e16327",
+    result = {"spec": "scripts/mbpp_v2_moderator_spec.md",
               "ledger": args.ledger, "families": []}
-    txt = ["Tier 0 moderator-stratified arm association (pre-registered)", "=" * 62, ""]
+    txt = ["Tier 0 moderator-stratified arm association (exploratory)", "=" * 62, ""]
     for model in MODEL_ORDER:
         mr = [r for r in rows if r["model"] == model]
         m0 = [r for r in mr if r["T"] == 0]

@@ -1,6 +1,5 @@
 {
  "spec": "scripts/mbpp_v2_moderator_spec.md",
- "registration_commit": "0e16327",
  "ledger": "data/mbpp_v2/production",
  "families": [
   {

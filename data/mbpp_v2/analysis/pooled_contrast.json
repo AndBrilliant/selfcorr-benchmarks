@@ -1,0 +1,65 @@
+{
+  "method": "Cochran-Mantel-Haenszel generalization of the paired incorrect-stratum McNemar contrast across the five families; Q = (sum b - sum c)^2 / (sum b + c) on 1 df; Breslow-Day homogeneity of per-family odds ratios on 4 df",
+  "source": "data/mbpp_v2/analysis/mbpp_v2_analysis.json",
+  "families": [
+    {
+      "model": "gpt-5.4",
+      "incorrect_paired": 427,
+      "b_selfcheck_only": 28,
+      "c_steelman_only": 21,
+      "delta_kappa_points": -1.639344262295082,
+      "mcnemar_exact_p": 0.3916029105474905,
+      "holm_p": 0.3916029105474905
+    },
+    {
+      "model": "ds-v4-flash",
+      "incorrect_paired": 389,
+      "b_selfcheck_only": 19,
+      "c_steelman_only": 9,
+      "delta_kappa_points": -2.570694087403599,
+      "mcnemar_exact_p": 0.08715855330228806,
+      "holm_p": 0.26147565990686417
+    },
+    {
+      "model": "glm-5.3-flash",
+      "incorrect_paired": 299,
+      "b_selfcheck_only": 26,
+      "c_steelman_only": 16,
+      "delta_kappa_points": -3.3444816053511706,
+      "mcnemar_exact_p": 0.16414940178310644,
+      "holm_p": 0.3282988035662129
+    },
+    {
+      "model": "qwen38-flash",
+      "incorrect_paired": 413,
+      "b_selfcheck_only": 26,
+      "c_steelman_only": 8,
+      "delta_kappa_points": -4.358353510895884,
+      "mcnemar_exact_p": 0.0029350556433200836,
+      "holm_p": 0.011740222573280334
+    },
+    {
+      "model": "gpt-6-luna",
+      "incorrect_paired": 432,
+      "b_selfcheck_only": 32,
+      "c_steelman_only": 3,
+      "delta_kappa_points": -6.712962962962963,
+      "mcnemar_exact_p": 4.176981747150421e-07,
+      "holm_p": 2.0884908735752106e-06
+    }
+  ],
+  "totals": {
+    "b_selfcheck_only": 131,
+    "c_steelman_only": 57
+  },
+  "pooled": {
+    "cmh_q": 29.127659574468087,
+    "cmh_df": 1,
+    "cmh_chi2_sf": 6.776261920642357e-08,
+    "common_odds_ratio": 2.2982456140350878,
+    "breslow_day_x2": 13.46960996264048,
+    "breslow_day_df": 4,
+    "breslow_day_chi2_sf": 0.009195190437904963
+  },
+  "interpretation": "The pooled test supports direction consistency (steelman lowers false acceptance in aggregate, p=6.8e-8) but does not assume a common effect size: Breslow-Day rejects homogeneity of the per-family odds ratios (p~0.01), so effect sizes remain the per-family estimates."
+}

@@ -32,6 +32,10 @@ python3 scripts/mbpp_v2_cross_analysis.py          # crossed-matrix discordance 
 python3 scripts/mbpp_v2_crossed_model.py           # crossed evaluator x generator model
 python3 scripts/mbpp_v2_moderator_analysis.py      # task-moderator (task-source) analysis
 python3 scripts/mbpp_v2_assert_visible_analysis.py # one-assert-visible Qwen control
+python3 scripts/mbpp_v2_pooled_contrast.py         # pooled CMH paired contrast across the five
+                                                   # families (reads mbpp_v2_analysis.json, writes
+                                                   # pooled_contrast.json; manifest.sha256 covers
+                                                   # both)
 python3 scripts/humaneval/paired_contrasts.py      # HumanEval paired contrasts
 ```
 

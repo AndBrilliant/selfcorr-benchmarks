@@ -22,8 +22,10 @@ Secondary population: all paired records (both T strata) for robustness.
 
 Primary statistic: phi coefficient between the two arms' binary verdicts.
 Association measure is phi (not odds ratio) because discordant-off-diagonal
-cells are small in some strata; phi is bounded and directly comparable across
-strata of different sizes.
+cells are small in some strata. Caveat: phi's attainable maximum is bounded by
+the marginal distributions, so phi is NOT directly comparable across strata or
+families with different skew; cross-stratum comparison uses the excess of the
+arm agreement rate over the independence baseline computed from the marginals.
 
 ## Moderators (all computable from the task definition and frozen candidate
 code before any evaluator outcome is known; none uses T, test outcomes,
